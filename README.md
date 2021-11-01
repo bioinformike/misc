@@ -1,7 +1,7 @@
 This is my repo where I keep all the scripts and programs that don't seem to fit into any of my other repos.
 
-Contents:
-random_audio_check.sh: A shell script that uses ffmpeg to check a video file for audio using random sampling of short duration clips, rather than processing the entire clip.
+### Random Audio Checker
+random_audio_check.sh is a shell script that uses ffmpeg to check a video file for audio using random sampling of short duration clips, rather than processing the entire clip.
 
     Usage:
       random_audio_check.sh v0.3.0 [-v] [-f input file] [-n # samples] [-s sample lenght]

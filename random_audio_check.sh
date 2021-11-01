@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION="0.2.0"
+VERSION="0.4.0"
 
 # Number of samples to extractDefault number of samples to take from input file
 NUM_SAMPLES=5
@@ -10,14 +10,14 @@ SAMPLE_DURATION=10
 # Verbosity flag
 verbose=false
 
+PROGRAM_NAME=$(basename "${0}")
 
 print_usage() {
-	printf
-    printf "%s" "usage: ${0}v${VERSION} [-ndv] [-f input file]"
-    printf "%-5s%s\n" "-n" "Number of video samples to measure volume [Default: 5]"
-    printf "%-5s%s\n" "-d" "Video sample duration in seconds [Default: 10]"
-    printf "%-5s%s\n" "-f" "Input video file"
-    printf "%-5s%s\n" "-v" "Increase verbosity"
+    printf "%s\n  %s\n" "Usage:" "${PROGRAM_NAME} v${VERSION} [-v] [-f input file] [-n # samples] [-s sample lenght]"
+    printf "    %-5s%-45s%s\n" "-n" "Number of video samples to measure volume" "[Default: 5]"
+    printf "    %-5s%-45s%s\n" "-d" "Video sample duration in seconds" "[Default: 10]"
+    printf "    %-5s%-45s\n" "-f" "Input video file"
+    printf "    %-5s%-45s\n" "-v" "Increase verbosity"
     exit 1
 }
 
@@ -32,7 +32,29 @@ while getopts 'n:d:f:v' flag; do
   esac
 done
 
-       
+# Verify file first [https://stackoverflow.com/a/13864829]
+if [ -z ${input_video+x} ]; then
+
+    printf "%s\n" "Error: No input file given!"
+    print_usage
+    exit 1
+fi
+
+# Verify we have ffmpeg and ffprobe
+# https://stackoverflow.com/a/677212
+if ! command -v ffmpeg &> /dev/null
+then
+    printf "%s\n" "ffmpeg is required and could not be found, please verify that it's in your path."
+    exit 1
+fi
+
+if ! command -v ffprobe &> /dev/null
+then
+    printf "%s\n" "ffprobe is required and could not be found, please verify that it's in your path."
+    exit 1
+fi
+
+
 # Get the duration of file and truncate to int
 # https://unix.stackexchange.com/q/89712
 file_probe=$(ffprobe -i "${input_video}" -show_format 2>&1)
@@ -111,5 +133,5 @@ fi
 if [ "${verbose}" = true ]; then 
   printf "%s\n" "Mean volume across ${NUM_SAMPLES} ${SAMPLE_DURATION}-second samples of input file ${input_video}: ${mean_of_mean_volume}"
 else
-  printf "%s\n" "${mean_of_mean_volume}"
+  printf "%s\t%s\n" "${input_video}" "${mean_of_mean_volume}"
 fi

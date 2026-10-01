@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>US Respiratory Pathogen Mix</title>
+<meta name="description" content="Estimated share of US upper and lower respiratory tract infections caused by each pathogen, 2015–2026.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap">
+<style>
+/* Layout: masthead → one shared legend/controls row → upper | lower tract panels side by side
+   (donut + ranked shares, then 100% year columns) → full species table → method & sources. */
+:root {
+  --plane: #f1f3f1;
+  --surface: #fcfcfb;
+  --surface-2: #eef0ec;
+  --ink: #121513;
+  --ink-2: #474d49;
+  --ink-3: #646a66;
+  --grid: #e2e4de;
+  --axis: #c0c4bc;
+  --border: rgba(18, 21, 19, 0.11);
+  --accent: #1f5fb4;
+  --sel: #e6e9e3;
+  --c-other: #b7b9b1;
+  --c-focus: #2a2e2b;
+
+  /* Pathogen identity. Viruses take cool hues, bacteria warm; validated for
+     adjacent-pair CVD separation in stack order, light and dark. */
+  --c-rhino: #337bd0;
+  --c-sars2: #643b9a;
+  --c-rsv:   #06bfa0;
+  --c-fluA:  #435ab8;
+  --c-fluB:  #02bced;
+  --c-hmpv:  #54b05a;
+  --c-piv:   #9c4ea1;
+  --c-adeno: #40befd;
+  --c-hcov:  #c65b93;
+  --c-spn:   #d67523;
+  --c-gas:   #a73447;
+  --c-hflu:  #d6ab1b;
+  --c-mpn:   #9f3501;
+
+  --font-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --step--1: 0.8125rem;
+  --step-0: 0.9375rem;
+  --step-1: 1.125rem;
+  --step-2: 1.5rem;
+  --step-3: 2.25rem;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --plane: #0e0f0e; --surface: #1a1a19; --surface-2: #232422; --ink: #f2f3f0; --ink-2: #c4c7bf;
+    --ink-3: #9da199; --grid: #2c2d2a; --axis: #3d3f3a; --border: rgba(255, 255, 255, 0.10);
+    --accent: #8ab6f0; --sel: #272926; --c-other: #5f625c; --c-focus: #eceee8;
+    --c-rhino: #4e95ed; --c-sars2: #7a53b4; --c-rsv: #03ac8f; --c-fluA: #526aca; --c-fluB: #07a3cd;
+    --c-hmpv: #4ea954; --c-piv: #9d4fa3; --c-adeno: #06a0dd; --c-hcov: #b0477f; --c-spn: #d87725;
+    --c-gas: #ba4656; --c-hflu: #b48f05; --c-mpn: #b94d23;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --plane: #0e0f0e; --surface: #1a1a19; --surface-2: #232422; --ink: #f2f3f0; --ink-2: #c4c7bf;
+  --ink-3: #9da199; --grid: #2c2d2a; --axis: #3d3f3a; --border: rgba(255, 255, 255, 0.10);
+  --accent: #8ab6f0; --sel: #272926; --c-other: #5f625c; --c-focus: #eceee8;
+  --c-rhino: #4e95ed; --c-sars2: #7a53b4; --c-rsv: #03ac8f; --c-fluA: #526aca; --c-fluB: #07a3cd;
+  --c-hmpv: #4ea954; --c-piv: #9d4fa3; --c-adeno: #06a0dd; --c-hcov: #b0477f; --c-spn: #d87725;
+  --c-gas: #ba4656; --c-hflu: #b48f05; --c-mpn: #b94d23;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--plane);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--step-0);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 28px 48px;
+  display: grid;
+  gap: 20px;
+}
+@media (min-width: 720px) { .page { padding-inline: 28px; } }
+
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -0.005em; }
+h1 { font-size: var(--step-3); font-weight: 600; line-height: 1.1; }
+h2 { font-size: var(--step-2); font-weight: 600; line-height: 1.2; }
+h3 { font-size: var(--step-1); font-weight: 600; }
+p { margin: 0; }
+a { color: var(--accent); text-underline-offset: 2px; }
+i { font-style: italic; }
+.num { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.eyebrow {
+  font-family: var(--font-data); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Masthead */
+.masthead { display: grid; gap: 10px; }
+.dek { max-width: 68ch; color: var(--ink-2); font-size: var(--step-1); line-height: 1.45; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px;
+  font-size: var(--step--1); color: var(--ink-2); background: var(--surface);
+}
+.chip svg { flex: none; }
+
+/* Controls + legend */
+.controls {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 16px; display: grid; gap: 12px;
+}
+.controls-top { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: space-between; }
+.controls-hint { color: var(--ink-3); font-size: var(--step--1); }
+.toggle { display: inline-flex; align-items: center; gap: 8px; font-size: var(--step--1); color: var(--ink-2); cursor: pointer; }
+.toggle input { width: 16px; height: 16px; accent-color: var(--accent); margin: 0; }
+.focus-pill {
+  display: inline-flex; align-items: center; gap: 8px; font-size: var(--step--1);
+  border: 1px solid var(--border); border-radius: 999px; padding: 2px 4px 2px 10px; background: var(--surface-2);
+}
+.focus-pill button {
+  border: 0; background: transparent; cursor: pointer; padding: 2px 8px; border-radius: 999px; color: var(--ink-2);
+}
+.focus-pill button:hover { background: var(--sel); color: var(--ink); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: flex-start; }
+.legend-group { display: flex; flex-wrap: wrap; gap: 4px 4px; align-items: center; min-width: 0; }
+.legend-group .eyebrow { margin-right: 4px; }
+.lg {
+  display: inline-flex; align-items: center; gap: 7px; border: 1px solid transparent; background: transparent;
+  padding: 3px 8px; border-radius: 6px; cursor: pointer; font-size: var(--step--1); color: var(--ink-2);
+  line-height: 1.3;
+}
+.lg:hover { background: var(--surface-2); color: var(--ink); }
+.lg[aria-pressed="true"] { border-color: var(--ink-3); color: var(--ink); background: var(--surface-2); }
+.has-focus .lg[aria-pressed="false"] { opacity: 0.55; }
+.sw { width: 12px; height: 12px; border-radius: 3px; flex: none; display: inline-block; }
+
+/* Panels */
+.panels { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); }
+.panel {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 18px 18px 14px; display: flex; flex-direction: column; gap: 16px; min-width: 0;
+}
+.panel > .bars-head { margin-top: auto; }
+.panel-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; align-items: start; }
+.panel-head > div { min-width: 0; }
+.panel-sub { color: var(--ink-3); font-size: var(--step--1); margin-top: 2px; }
+.stepper { display: inline-flex; align-items: center; gap: 2px; border: 1px solid var(--border); border-radius: 8px; padding: 2px; background: var(--surface); }
+.stepper button {
+  width: 30px; height: 30px; border: 0; background: transparent; border-radius: 6px; cursor: pointer; color: var(--ink-2);
+  display: grid; place-items: center;
+}
+.stepper button:hover:not(:disabled) { background: var(--surface-2); color: var(--ink); }
+.stepper button:disabled { opacity: 0.35; cursor: default; }
+.stepper output { font-family: var(--font-data); font-weight: 500; min-width: 4.4ch; text-align: center; font-size: var(--step-0); }
+.year-note {
+  font-size: var(--step--1); color: var(--ink-2); background: var(--surface-2); border-radius: 8px; padding: 8px 12px;
+  display: flex; gap: 10px; align-items: baseline;
+}
+.year-note .num { color: var(--ink); font-weight: 500; flex: none; }
+
+.composition { display: flex; flex-wrap: wrap; gap: 18px 22px; align-items: center; }
+.donut-wrap { flex: none; width: 220px; max-width: 100%; margin-inline: auto; }
+.donut-wrap svg { display: block; width: 100%; height: auto; overflow: visible; }
+.ranked { flex: 1 1 220px; min-width: 0; list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+.ranked li { min-width: 0; }
+.rk {
+  width: 100%; display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; gap: 9px; align-items: center;
+  border: 0; background: transparent; padding: 3px 6px; border-radius: 5px; cursor: pointer; text-align: left;
+  font-size: var(--step--1); color: var(--ink-2);
+}
+.rk:hover { background: var(--surface-2); color: var(--ink); }
+.rk .nm { overflow-wrap: anywhere; }
+.rk .num { color: var(--ink); }
+.rk.dim { opacity: 0.4; }
+.rk.on { background: var(--surface-2); color: var(--ink); }
+.ranked .total { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; gap: 9px; padding: 5px 6px 0; margin-top: 3px;
+  border-top: 1px solid var(--grid); font-size: var(--step--1); color: var(--ink-3); }
+.ranked .total .num { color: var(--ink-2); }
+
+.bars-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.bars-head .panel-sub { margin: 0; }
+.bars { position: relative; width: 100%; min-width: 0; }
+.bars svg { display: block; width: 100%; overflow: visible; }
+.col { cursor: pointer; outline: none; }
+.col .hit { fill: transparent; }
+.col:focus-visible .ring { stroke: var(--accent); stroke-width: 2; }
+.axis-text { font-family: var(--font-data); font-size: 11px; fill: var(--ink-3); }
+.axis-text.sel { fill: var(--ink); font-weight: 500; }
+.focus-text { font-family: var(--font-data); font-size: 10.5px; fill: var(--ink); }
+.seg, .slice { transition: opacity 120ms ease; }
+.dimmed { opacity: 0.2; }
+
+/* Table */
+.table-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; display: grid; gap: 12px; min-width: 0; }
+.table-scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: var(--step--1); }
+th, td { padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--grid); vertical-align: baseline; }
+th { font-weight: 500; color: var(--ink-3); font-size: 0.75rem; letter-spacing: 0.04em; text-transform: uppercase; font-family: var(--font-data); }
+td.v, th.v { text-align: right; font-family: var(--font-data); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tbody tr.row { cursor: pointer; }
+tbody tr.row:hover td { background: var(--surface-2); }
+tbody tr.row.on td { background: var(--sel); }
+tbody tr.grp td { color: var(--ink); font-weight: 600; background: transparent; padding-top: 14px; font-family: var(--font-display); font-size: var(--step-0); }
+tbody tr.grp td.v { font-weight: 500; font-size: var(--step--1); color: var(--ink-2); }
+tfoot td { font-weight: 600; border-bottom: 0; border-top: 1px solid var(--axis); }
+.pname { display: inline-flex; align-items: center; gap: 9px; }
+.pnote { color: var(--ink-3); font-size: 0.75rem; display: block; margin-left: 21px; }
+
+/* Method */
+.method { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+.method section { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.method p, .method li { color: var(--ink-2); max-width: 66ch; }
+.method ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: var(--step--1); }
+.method h3 { font-size: var(--step-1); }
+footer { color: var(--ink-3); font-size: var(--step--1); border-top: 1px solid var(--grid); padding-top: 14px; }
+
+/* Tooltip */
+.tip {
+  position: fixed; z-index: 20; pointer-events: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; min-width: 140px; max-width: 260px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14); font-size: var(--step--1); line-height: 1.35;
+}
+.tip .tv { font-family: var(--font-data); font-size: var(--step-1); font-weight: 500; display: flex; align-items: center; gap: 8px; }
+.tip .tv .key { width: 14px; height: 3px; border-radius: 2px; flex: none; }
+.tip .tl { color: var(--ink-2); margin-top: 2px; }
+.tip .tc { color: var(--ink-3); font-size: 0.75rem; margin-top: 4px; font-family: var(--font-data); }
+.tip ul { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 2px; color: var(--ink-2); font-size: 0.75rem; }
+.tip ul li { display: flex; justify-content: space-between; gap: 10px; }
+
+@media (prefers-reduced-motion: reduce) { .seg, .slice { transition: none; } }
+</style>
+</head>
+<body>
+<div class="page" id="page">
+  <header class="masthead">
+    <span class="eyebrow">United States · 2015–2026</span>
+    <h1>US Respiratory Pathogen Mix</h1>
+    <p class="dek">The estimated share of upper and lower respiratory tract infections caused by each virus, bacterium, fungus and protozoan, for every year since 2015. Shares are of illnesses with an identified cause, so each year adds to 100%.</p>
+    <div class="chips">
+      <span class="chip"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.2v3.2l2 1.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Modeled estimates, not an official dataset</span>
+      <span class="chip">2026* = January–September</span>
+      <span class="chip">29 pathogens in 4 groups</span>
+    </div>
+  </header>
+
+  <section class="controls" id="controls" aria-label="Legend and controls">
+    <div class="controls-top">
+      <p class="controls-hint">Click a year column to see that year’s mix. Click a pathogen to follow it across years.</p>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <span class="focus-pill" id="focus-pill" hidden><span id="focus-label"></span><button type="button" id="focus-clear" aria-label="Stop following this pathogen">Clear</button></span>
+        <label class="toggle" for="link-years"><input type="checkbox" id="link-years" checked>Link years across panels</label>
+      </div>
+    </div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <main class="panels" id="panels"></main>
+
+  <section class="table-card" aria-labelledby="table-title">
+    <div class="bars-head">
+      <h2 id="table-title">Every pathogen, by tract</h2>
+      <p class="panel-sub" id="table-sub"></p>
+    </div>
+    <div class="table-scroll">
+      <table id="table">
+        <thead><tr><th scope="col">Pathogen</th><th scope="col" class="v" id="th-upper">Upper</th><th scope="col" class="v" id="th-lower">Lower</th></tr></thead>
+        <tbody></tbody>
+        <tfoot><tr><td>Total</td><td class="v">100.00%</td><td class="v">100.00%</td></tr></tfoot>
+      </table>
+    </div>
+  </section>
+
+  <section class="method" aria-label="Method and sources">
+    <section>
+      <h3>How the numbers were built</h3>
+      <p>Each pathogen starts from its share of illnesses with an identified cause in a typical 2015–2019 year. These starting shares come from etiology studies: the CDC EPIC pneumonia studies for the lower tract, and common-cold, pharyngitis and ear-infection studies for the upper tract.</p>
+      <p>Each calendar year, that share is scaled by how active the pathogen was compared with a typical year. Virus activity comes from CDC lab surveillance (NREVSS). Bacteria and fungi use national case counts for pertussis, Legionnaires’ disease, tuberculosis and Valley fever, plus published surge reports. Influenza and SARS-CoV-2 use CDC’s estimates of symptomatic illnesses directly. The values are then rescaled so each tract adds to 100%.</p>
+    </section>
+    <section>
+      <h3>What a share means</h3>
+      <p>A share is the fraction of symptomatic illnesses with a known cause. It is not test positivity, and it is not deaths. Illnesses with no identified pathogen are left out, which is roughly a quarter of colds and over half of adult pneumonias. A co-infection is counted once, under its main pathogen.</p>
+      <p><strong>Upper tract:</strong> colds, sore throat, sinusitis, ear infections and croup (ICD-10 J00–J06, H65–H66). <strong>Lower tract:</strong> bronchiolitis, acute bronchitis and pneumonia (J09–J22).</p>
+      <p>These are modeled estimates. The large categories are uncertain by a few percentage points. The 2026 values cover January to September, and the July–September portion partly relies on assumptions.</p>
+    </section>
+    <section>
+      <h3>Sources</h3>
+      <ol>
+        <li>Jain S, et al. Community-acquired pneumonia requiring hospitalization among U.S. adults. <i>N Engl J Med</i> 2015;373:415–27. <a href="https://doi.org/10.1056/NEJMoa1500245" target="_blank" rel="noopener">doi</a></li>
+        <li>Jain S, et al. Community-acquired pneumonia requiring hospitalization among U.S. children. <i>N Engl J Med</i> 2015;372:835–45. <a href="https://doi.org/10.1056/NEJMoa1405870" target="_blank" rel="noopener">doi</a></li>
+        <li>Heikkinen T, Järvinen A. The common cold. <i>Lancet</i> 2003;361:51–59. <a href="https://doi.org/10.1016/S0140-6736(03)12162-9" target="_blank" rel="noopener">doi</a></li>
+        <li>Kaur R, Morris M, Pichichero ME. Epidemiology of acute otitis media in the postpneumococcal conjugate vaccine era. <i>Pediatrics</i> 2017;140:e20170181. <a href="https://doi.org/10.1542/peds.2017-0181" target="_blank" rel="noopener">doi</a></li>
+        <li>Centor RM, et al. The clinical presentation of <i>Fusobacterium</i>-positive and streptococcal-positive pharyngitis. <i>Ann Intern Med</i> 2015;162:241–47. <a href="https://doi.org/10.7326/M14-1305" target="_blank" rel="noopener">doi</a></li>
+        <li>CDC. Preliminary estimated flu disease burden, 2024–25 season (and prior seasons). <a href="https://archive.cdc.gov/www_cdc_gov/flu-burden/php/data-vis/2024-2025.html" target="_blank" rel="noopener">cdc.gov</a></li>
+        <li>CDC FluView weekly surveillance, 2025–26 season, week 9 of 2026. <a href="https://www.cdc.gov/fluview/surveillance/2026-week-09.html" target="_blank" rel="noopener">cdc.gov</a></li>
+        <li>Estimated burden of COVID-19 illnesses, medical visits, hospitalizations and deaths in the US, October 2022–September 2024. <i>JAMA Intern Med</i> 2026;186:321–30. <a href="https://jamanetwork.com/journals/jamainternalmedicine/fullarticle/2843383" target="_blank" rel="noopener">jamanetwork.com</a></li>
+        <li>CDC. Preliminary 2024–2025 U.S. COVID-19 burden estimates. <a href="https://healthdata.gov/CDC/Preliminary-2024-2025-U-S-COVID-19-Burden-Estimate/grcr-g4b3" target="_blank" rel="noopener">healthdata.gov</a></li>
+        <li>CDC. National Respiratory and Enteric Virus Surveillance System (NREVSS). <a href="https://www.cdc.gov/nrevss/php/dashboard/index.html" target="_blank" rel="noopener">cdc.gov</a></li>
+        <li>CDC. <i>Mycoplasma pneumoniae</i> infections in hospitalized children, United States, 2018–2024. <i>MMWR</i> 2025;74(23). <a href="https://www.cdc.gov/mmwr/volumes/74/wr/mm7423a1.htm" target="_blank" rel="noopener">cdc.gov</a></li>
+        <li>CDC. Provisional pertussis surveillance reports, 2024 and 2025. <a href="https://www.cdc.gov/pertussis/media/pdfs/2026/02/363295-A_FS_PertussisSurveillanceReport_011626_508pass.pdf" target="_blank" rel="noopener">cdc.gov</a></li>
+        <li>CDC. 2025 provisional tuberculosis data. <a href="https://www.cdc.gov/tb-data/aboutprovisionaldata/2025-provisional-data.html" target="_blank" rel="noopener">cdc.gov</a></li>
+        <li>CDC. Valley fever (coccidioidomycosis) statistics. <a href="https://www.cdc.gov/valley-fever/index.html" target="_blank" rel="noopener">cdc.gov</a></li>
+      </ol>
+    </section>
+  </section>
+
+  <footer>Modeled from published surveillance and research figures; not produced or endorsed by CDC. Every value is in <span class="num">estimates.csv</span>, which <span class="num">build_estimates.py</span> regenerates, in the <span class="num">respiratory_pathogen_prevalence</span> folder of the misc repository.</footer>
+</div>
+
+<div class="tip" id="tip" role="status" aria-live="polite" hidden></div>
+
+<script>
+/* DATA:START */
+const DATA = {"years":[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],"pathogens":[{"id":"rhino","name":"Rhinovirus / enterovirus","type":"virus","note":"Rhinovirus A-C, EV-D68 and other enteroviruses"},{"id":"fluA","name":"Influenza A","type":"virus","note":"H1N1pdm09 and H3N2"},{"id":"fluB","name":"Influenza B","type":"virus","note":"Victoria lineage (Yamagata not detected since 2020)"},{"id":"sars2","name":"SARS-CoV-2","type":"virus","note":"COVID-19, from 2020"},{"id":"rsv","name":"RSV","type":"virus","note":"Respiratory syncytial virus A and B"},{"id":"hmpv","name":"Human metapneumovirus","type":"virus","note":"hMPV"},{"id":"piv","name":"Parainfluenza viruses","type":"virus","note":"HPIV 1-4"},{"id":"adeno","name":"Adenovirus","type":"virus","note":"Species B, C and E"},{"id":"hcov","name":"Seasonal coronaviruses","type":"virus","note":"229E, NL63, OC43, HKU1"},{"id":"spn","name":"Streptococcus pneumoniae","type":"bacteria","note":"Pneumococcus"},{"id":"gas","name":"Streptococcus pyogenes","type":"bacteria","note":"Group A strep"},{"id":"hflu","name":"Haemophilus influenzae","type":"bacteria","note":"Mostly nontypeable"},{"id":"mcat","name":"Moraxella catarrhalis","type":"bacteria","note":""},{"id":"mpn","name":"Mycoplasma pneumoniae","type":"bacteria","note":"Now also named Mycoplasmoides pneumoniae"},{"id":"cpn","name":"Chlamydia pneumoniae","type":"bacteria","note":""},{"id":"bper","name":"Bordetella pertussis","type":"bacteria","note":"Whooping cough"},{"id":"leg","name":"Legionella spp.","type":"bacteria","note":"Legionnaires' disease and Pontiac fever"},{"id":"sau","name":"Staphylococcus aureus","type":"bacteria","note":"MSSA and MRSA"},{"id":"gnb","name":"Gram-negative bacilli","type":"bacteria","note":"Klebsiella, Pseudomonas, E. coli and others"},{"id":"fnec","name":"Fusobacterium necrophorum","type":"bacteria","note":"Adolescent and young-adult pharyngitis"},{"id":"gcs","name":"Group C/G streptococci","type":"bacteria","note":"Streptococcus dysgalactiae"},{"id":"mtb","name":"Mycobacterium tuberculosis","type":"bacteria","note":"Tuberculosis"},{"id":"cocci","name":"Coccidioides spp.","type":"fungi","note":"Valley fever"},{"id":"histo","name":"Histoplasma capsulatum","type":"fungi","note":"Histoplasmosis"},{"id":"pjp","name":"Pneumocystis jirovecii","type":"fungi","note":"Classed as a protozoan until the 1980s"},{"id":"asp","name":"Aspergillus spp.","type":"fungi","note":"Including COVID-associated aspergillosis"},{"id":"blasto","name":"Blastomyces spp.","type":"fungi","note":"Blastomycosis"},{"id":"mucor","name":"Mucorales","type":"fungi","note":"Mucormycosis, mostly rhino-sinus"},{"id":"proto","name":"Protozoa","type":"protozoa","note":"Toxoplasma, Cryptosporidium, Leishmania and others"}],"shares":{"upper":{"2015":[42.1,4.12,1.6,0.0,5.0,3.16,5.53,5.26,11.58,3.83,6.5,4.74,2.1,1.26,0.53,0.48,0.04,0.32,0.11,0.84,0.84,0.01,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2016":[41.39,5.78,2.3,0.0,5.17,3.11,4.92,5.17,10.81,3.69,6.53,4.66,2.07,1.3,0.52,0.41,0.04,0.31,0.1,0.83,0.83,0.01,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2017":[39.98,6.97,2.75,0.0,5.0,2.85,5.25,5.0,11.55,3.5,6.5,4.5,2.0,1.14,0.5,0.41,0.05,0.3,0.1,0.8,0.8,0.0,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2018":[41.12,7.12,3.65,0.0,4.9,3.08,4.65,4.9,10.23,3.36,6.56,4.41,1.96,1.18,0.49,0.33,0.06,0.29,0.1,0.78,0.78,0.0,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2019":[39.32,8.11,2.73,0.0,5.16,2.95,4.91,4.91,11.35,3.3,6.71,4.42,1.97,1.18,0.49,0.4,0.06,0.3,0.1,0.79,0.79,0.0,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2020":[36.83,5.61,2.38,25.52,2.59,2.24,2.01,2.88,6.33,2.42,4.11,3.11,1.38,0.48,0.29,0.15,0.06,0.29,0.12,0.55,0.55,0.01,0.0,0.0,0.0,0.08,0.0,0.01,0.0],"2021":[42.24,1.13,0.03,23.79,5.28,1.36,5.28,4.02,4.42,2.46,3.6,3.17,1.41,0.12,0.18,0.05,0.05,0.27,0.11,0.48,0.48,0.0,0.0,0.0,0.0,0.07,0.0,0.0,0.0],"2022":[32.99,6.58,0.12,22.17,5.62,1.91,3.75,4.12,7.84,2.49,5.85,3.21,1.43,0.09,0.19,0.05,0.04,0.23,0.08,0.6,0.6,0.0,0.0,0.0,0.0,0.04,0.0,0.0,0.0],"2023":[37.0,5.5,0.57,9.71,3.93,3.75,4.63,4.63,10.18,3.24,7.82,4.16,1.85,0.55,0.39,0.14,0.05,0.28,0.09,0.74,0.74,0.0,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2024":[37.1,7.64,1.66,6.92,4.2,2.65,4.42,4.42,10.2,3.0,6.31,3.97,1.77,2.76,0.44,0.68,0.05,0.26,0.09,0.71,0.71,0.0,0.0,0.0,0.0,0.04,0.0,0.0,0.0],"2025":[35.12,15.68,0.73,4.02,4.17,3.03,4.39,4.39,9.66,2.89,5.99,3.95,1.76,1.37,0.44,0.55,0.05,0.26,0.09,0.7,0.7,0.01,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2026":[38.73,5.69,4.62,4.09,3.11,3.53,4.84,5.19,9.89,3.1,6.74,4.36,1.94,1.08,0.52,0.39,0.05,0.31,0.1,0.83,0.83,0.01,0.0,0.0,0.0,0.05,0.0,0.0,0.0]},"lower":{"2015":[20.83,7.16,2.78,0.0,15.62,7.68,6.33,4.93,4.93,9.69,0.42,3.29,1.32,5.48,1.65,1.49,0.51,2.41,2.19,0.02,0.06,0.17,0.44,0.28,0.15,0.13,0.03,0.01,0.0],"2016":[19.99,9.8,3.89,0.0,15.79,7.37,5.5,4.74,4.5,9.12,0.41,3.16,1.26,5.52,1.58,1.24,0.5,2.32,2.1,0.02,0.05,0.16,0.42,0.26,0.13,0.13,0.03,0.01,0.0],"2017":[19.29,11.81,4.65,0.0,15.23,6.75,5.86,4.57,4.8,8.63,0.41,3.05,1.22,4.82,1.52,1.26,0.59,2.23,2.03,0.02,0.05,0.15,0.52,0.26,0.12,0.12,0.03,0.01,0.0],"2018":[19.69,11.96,6.13,0.0,14.8,7.25,5.16,4.44,4.22,8.22,0.41,2.96,1.18,4.93,1.48,1.01,0.74,2.17,1.97,0.02,0.05,0.15,0.54,0.25,0.11,0.12,0.03,0.01,0.0],"2019":[18.69,13.52,4.56,0.0,15.49,6.89,5.41,4.43,4.65,8.03,0.41,2.95,1.18,4.92,1.47,1.19,0.71,2.16,1.97,0.02,0.05,0.14,0.64,0.25,0.11,0.12,0.03,0.01,0.0],"2020":[13.04,6.97,2.96,47.55,5.79,3.9,1.65,1.93,1.93,4.37,0.19,1.54,0.62,1.5,0.64,0.34,0.52,1.6,1.8,0.01,0.03,0.1,0.56,0.19,0.1,0.13,0.03,0.01,0.0],"2021":[16.15,1.52,0.04,44.66,12.75,2.55,4.67,2.91,1.46,4.82,0.18,1.7,0.68,0.4,0.43,0.12,0.51,1.6,1.7,0.01,0.02,0.1,0.57,0.2,0.09,0.13,0.02,0.01,0.0],"2022":[13.62,9.54,0.18,35.34,14.67,3.88,3.59,3.23,2.79,5.26,0.31,1.86,0.74,0.33,0.49,0.13,0.41,1.43,1.3,0.01,0.03,0.09,0.42,0.16,0.07,0.09,0.02,0.01,0.0],"2023":[17.45,9.1,0.95,16.87,11.71,8.68,5.05,4.13,4.13,7.81,0.48,2.76,1.1,2.3,1.17,0.42,0.61,2.02,1.84,0.02,0.05,0.14,0.73,0.23,0.1,0.11,0.03,0.01,0.0],"2024":[16.44,11.88,2.58,10.76,10.57,5.77,4.53,3.71,3.89,6.79,0.36,2.47,0.99,10.71,1.24,1.91,0.54,1.81,1.65,0.02,0.04,0.14,0.78,0.21,0.08,0.1,0.02,0.01,0.0],"2025":[15.65,24.51,1.14,6.29,9.97,6.63,4.53,3.71,3.7,6.58,0.35,2.47,0.99,5.35,1.23,1.55,0.57,1.81,1.65,0.02,0.04,0.14,0.7,0.21,0.08,0.1,0.02,0.01,0.0],"2026":[18.71,9.64,7.83,6.93,8.07,8.37,5.42,4.75,4.12,7.65,0.42,2.96,1.18,4.57,1.58,1.2,0.65,2.32,2.11,0.02,0.05,0.18,0.73,0.26,0.11,0.13,0.03,0.01,0.0]}},"trace":{"upper":{"2015":["mucor","proto"],"2016":["mucor","proto"],"2017":["mtb","mucor","proto"],"2018":["mtb","mucor","proto"],"2019":["mtb","mucor","proto"],"2020":["proto"],"2021":["mtb","mucor","proto"],"2022":["mtb","mucor","proto"],"2023":["mtb","mucor","proto"],"2024":["mtb","mucor","proto"],"2025":["mucor","proto"],"2026":["mucor","proto"]},"lower":{"2015":["proto"],"2016":["proto"],"2017":["proto"],"2018":["proto"],"2019":["proto"],"2020":["proto"],"2021":["proto"],"2022":["proto"],"2023":["proto"],"2024":["proto"],"2025":["proto"],"2026":["proto"]}}};
+/* DATA:END */
+
+(() => {
+  "use strict";
+  const SVGNS = "http://www.w3.org/2000/svg";
+  const P = DATA.pathogens;
+  const YEARS = DATA.years;
+  const FIRST = YEARS[0], LAST = YEARS[YEARS.length - 1];
+  const IDX = Object.fromEntries(P.map((p, i) => [p.id, i]));
+  const BYID = Object.fromEntries(P.map((p) => [p.id, p]));
+
+  // Fixed stack / legend order. Everything else folds into "Other species".
+  const COLORED = ["rhino", "sars2", "rsv", "fluA", "fluB", "hmpv", "piv", "adeno", "hcov", "spn", "gas", "hflu", "mpn"];
+  const OTHER = P.map((p) => p.id).filter((id) => !COLORED.includes(id));
+  const ITALIC_FULL = new Set(["spn", "gas", "hflu", "mcat", "mpn", "cpn", "bper", "sau", "fnec", "mtb", "histo", "pjp"]);
+  const ITALIC_GENUS = new Set(["leg", "cocci", "asp", "blasto"]);
+  const SHORT = { spn: "S. pneumoniae", gas: "S. pyogenes (group A strep)", hflu: "H. influenzae", mpn: "M. pneumoniae" };
+  const GROUPS = [
+    { type: "virus", label: "Viruses" },
+    { type: "bacteria", label: "Bacteria" },
+    { type: "fungi", label: "Fungi" },
+    { type: "protozoa", label: "Protozoa" },
+  ];
+  const TRACTS = {
+    upper: { title: "Upper respiratory tract", sub: "Colds, sore throat, sinusitis, ear infections, croup · ICD-10 J00–J06, H65–H66" },
+    lower: { title: "Lower respiratory tract", sub: "Bronchiolitis, acute bronchitis, pneumonia · ICD-10 J09–J22" },
+  };
+  const EVENTS = {
+    2015: "The 2014–15 H3N2 season peaked in late December, so calendar 2015 was a lighter flu year.",
+    2016: "A mild H1N1 season that peaked late, in March.",
+    2017: "A typical year, with a sizable late-season influenza B wave.",
+    2018: "The severe 2017–18 H3N2 season, followed by a large B/Yamagata wave.",
+    2019: "A long H1N1-then-H3N2 season, and an early B/Victoria wave in December.",
+    2020: "SARS-CoV-2 arrives in March. Masking and distancing nearly stop flu and RSV.",
+    2021: "Flu is almost absent. RSV surges out of season in summer. Delta, then Omicron.",
+    2022: "Omicron peaks in January. RSV, flu and COVID collide in the fall “tripledemic”.",
+    2023: "A large spring hMPV season and a group A strep surge. RSV immunizations for infants and older adults arrive.",
+    2024: "Mycoplasma pneumonia surges in young children. Pertussis reaches its highest count since 2012.",
+    2025: "The most severe flu season since 2010–11 (43–73 million illnesses). H3N2 subclade K arrives early.",
+    2026: "January–September only. Influenza B dominates from February to April, and a COVID wave builds over the summer.",
+  };
+
+  const state = { year: { upper: 2025, lower: 2025 }, linked: true, focus: null, active: "upper" };
+
+  // ---------- helpers ----------
+  const val = (tract, year, id) => DATA.shares[tract][String(year)][IDX[id]];
+  const isTrace = (tract, year, id) => DATA.trace[tract][String(year)].includes(id);
+  // Table cell text: a real value, "<0.01" for trace amounts, or a dash when absent.
+  const cellText = (v, tract, year, ids) => (v > 0 ? `${fmt(v, 2)}%` : ids.some((id) => isTrace(tract, year, id)) ? "<0.01%" : "—");
+  const yearLabel = (y) => (y === LAST ? `${y}*` : String(y));
+  const colorVar = (key) => (key === "other" ? "var(--c-other)" : COLORED.includes(key) ? `var(--c-${key})` : "var(--c-focus)");
+  const el = (tag, attrs = {}, ...kids) => {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === "class") n.className = v;
+      else if (k === "text") n.textContent = v;
+      else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+      else n.setAttribute(k, v);
+    }
+    kids.forEach((c) => c != null && n.append(c));
+    return n;
+  };
+  const svg = (tag, attrs = {}) => {
+    const n = document.createElementNS(SVGNS, tag);
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+    return n;
+  };
+
+  function nameNode(id, { short = false } = {}) {
+    const frag = document.createDocumentFragment();
+    if (id === "other") { frag.append(`Other species (${otherIds().length})`); return frag; }
+    const name = short && SHORT[id] ? SHORT[id] : BYID[id].name;
+    if (ITALIC_FULL.has(id)) {
+      const m = name.match(/^(\S+ \S+)(.*)$/);
+      frag.append(el("i", { text: m ? m[1] : name }), m ? m[2] : "");
+    } else if (ITALIC_GENUS.has(id)) {
+      const [genus, ...rest] = name.split(" ");
+      frag.append(el("i", { text: genus }), " " + rest.join(" "));
+    } else {
+      frag.append(name);
+    }
+    return frag;
+  }
+  const plainName = (id) => (id === "other" ? `Other species (${otherIds().length})` : BYID[id].name);
+
+  function fmt(v, d = 1) {
+    if (v === 0) return "0";
+    const s = v.toFixed(d);
+    return Number(s) === 0 ? `<${(1 / 10 ** d).toFixed(d)}` : s;
+  }
+  // Largest-remainder rounding so displayed values add to exactly 100.
+  function roundTo100(values, d = 1) {
+    const scale = 10 ** d;
+    const exact = values.map((v) => v * scale);
+    const floors = exact.map(Math.floor);
+    let short = Math.round(100 * scale - floors.reduce((a, b) => a + b, 0));
+    exact.map((v, i) => [v - floors[i], i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (short > 0) { floors[i] += 1; short -= 1; } });
+    return floors.map((f) => f / scale);
+  }
+
+  const promoted = () => (state.focus && OTHER.includes(state.focus) ? state.focus : null);
+  const otherIds = () => OTHER.filter((id) => id !== promoted());
+
+  // Entities drawn for a tract-year: the 13 colored pathogens, a promoted
+  // "other" pathogen when one is followed, and the remaining Other group.
+  function entities(tract, year) {
+    const list = COLORED.map((id) => ({ key: id, value: val(tract, year, id) }));
+    const pro = promoted();
+    if (pro) list.push({ key: pro, value: val(tract, year, pro) });
+    const ids = otherIds();
+    list.push({ key: "other", value: ids.reduce((s, id) => s + val(tract, year, id), 0), members: ids });
+    return list;
+  }
+  const isDim = (key) => state.focus != null && state.focus !== key;
+
+  // ---------- tooltip ----------
+  const tip = document.getElementById("tip");
+  function showTip(anchor, { value, key, ctx, members, tract, year }) {
+    tip.replaceChildren();
+    const tv = el("div", { class: "tv" }, el("span", { class: "key", style: `background:${colorVar(key)}` }), `${fmt(value, 2)}%`);
+    const tl = el("div", { class: "tl" }, nameNode(key));
+    tip.append(tv, tl);
+    if (key !== "other" && BYID[key] && BYID[key].note) tip.append(el("div", { class: "tc", text: BYID[key].note }));
+    if (members) {
+      const top = members.map((id) => [id, val(tract, year, id)]).sort((a, b) => b[1] - a[1]).slice(0, 6);
+      const ul = el("ul");
+      top.forEach(([id, v]) => ul.append(el("li", {}, el("span", {}, nameNode(id)), el("span", { class: "num", text: fmt(v, 2) }))));
+      tip.append(ul);
+    }
+    tip.append(el("div", { class: "tc", text: ctx }));
+    tip.hidden = false;
+    place(anchor);
+  }
+  function place(anchor) {
+    let x, y;
+    if (anchor && "clientX" in anchor) { x = anchor.clientX; y = anchor.clientY; }
+    else { const r = anchor.getBoundingClientRect(); x = r.left + r.width / 2; y = r.top; }
+    const w = tip.offsetWidth, h = tip.offsetHeight, pad = 12;
+    let left = x + 14, top = y - h - 10;
+    if (left + w > window.innerWidth - pad) left = x - w - 14;
+    if (left < pad) left = pad;
+    if (top < pad) top = y + 18;
+    tip.style.left = `${left}px`;
+    tip.style.top = `${top}px`;
+  }
+  const hideTip = () => { tip.hidden = true; };
+
+  // ---------- state changes ----------
+  function selectYear(tract, y) {
+    y = Math.max(FIRST, Math.min(LAST, y));
+    if (state.linked) { state.year.upper = y; state.year.lower = y; } else state.year[tract] = y;
+    state.active = tract;
+    render();
+  }
+  function setFocus(key) {
+    state.focus = state.focus === key ? null : key;
+    render();
+  }
+
+  // ---------- legend ----------
+  function renderLegend() {
+    const legend = document.getElementById("legend");
+    legend.replaceChildren();
+    const groups = [
+      { label: "Viruses", keys: COLORED.filter((id) => BYID[id].type === "virus") },
+      { label: "Bacteria", keys: COLORED.filter((id) => BYID[id].type === "bacteria") },
+      { label: "Fungi, protozoa & minor bacteria", keys: ["other"] },
+    ];
+    groups.forEach((g) => {
+      const wrap = el("div", { class: "legend-group" }, el("span", { class: "eyebrow", text: g.label }));
+      g.keys.forEach((key) => {
+        wrap.append(el("button", {
+          type: "button", class: "lg", "aria-pressed": String(state.focus === key),
+          onclick: () => setFocus(key),
+        }, el("span", { class: "sw", style: `background:${colorVar(key)}` }), nameNode(key, { short: true })));
+      });
+      legend.append(wrap);
+    });
+    document.getElementById("controls").classList.toggle("has-focus", state.focus != null);
+    const pill = document.getElementById("focus-pill");
+    pill.hidden = state.focus == null;
+    if (state.focus) {
+      const label = document.getElementById("focus-label");
+      label.replaceChildren("Following ", el("strong", {}, nameNode(state.focus)));
+    }
+  }
+
+  // ---------- panels ----------
+  const panelsEl = document.getElementById("panels");
+  const panels = {};
+  function buildPanels() {
+    for (const tract of ["upper", "lower"]) {
+      const t = TRACTS[tract];
+      const out = el("output", { "aria-live": "polite" });
+      const prev = el("button", { type: "button", "aria-label": "Previous year", onclick: () => selectYear(tract, state.year[tract] - 1) });
+      prev.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M8.5 3 4.5 7l4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      const next = el("button", { type: "button", "aria-label": "Next year", onclick: () => selectYear(tract, state.year[tract] + 1) });
+      next.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M5.5 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      const note = el("p", { class: "year-note" });
+      const donut = el("div", { class: "donut-wrap" });
+      const ranked = el("ol", { class: "ranked", "aria-label": `${t.title} shares` });
+      const bars = el("div", { class: "bars" });
+      const barsSub = el("p", { class: "panel-sub" });
+      const panel = el("article", { class: "panel", "aria-labelledby": `h-${tract}` },
+        el("div", { class: "panel-head" },
+          el("div", {}, el("h2", { id: `h-${tract}`, text: t.title }), el("p", { class: "panel-sub", text: t.sub })),
+          el("div", { class: "stepper", role: "group", "aria-label": `${t.title} year` }, prev, out, next)),
+        note,
+        el("div", { class: "composition" }, donut, ranked),
+        el("div", { class: "bars-head" }, el("h3", { text: "Share by year" }), barsSub),
+        bars);
+      panelsEl.append(panel);
+      panels[tract] = { out, prev, next, note, donut, ranked, bars, barsSub };
+      new ResizeObserver(() => renderBars(tract)).observe(bars);
+    }
+  }
+
+  function renderPanel(tract) {
+    const p = panels[tract];
+    const y = state.year[tract];
+    p.out.textContent = yearLabel(y);
+    p.prev.disabled = y <= FIRST;
+    p.next.disabled = y >= LAST;
+    p.note.replaceChildren(el("span", { class: "num", text: yearLabel(y) }), el("span", { text: EVENTS[y] }));
+    p.barsSub.textContent = state.focus ? `Following ${plainName(state.focus)} · its share is listed under each year` : "Each column adds to 100%";
+    renderDonut(tract);
+    renderRanked(tract);
+    renderBars(tract);
+  }
+
+  function arcPath(cx, cy, r0, r1, a0, a1) {
+    const large = a1 - a0 > Math.PI ? 1 : 0;
+    const pt = (r, a) => `${(cx + r * Math.cos(a)).toFixed(2)},${(cy + r * Math.sin(a)).toFixed(2)}`;
+    return `M${pt(r1, a0)}A${r1},${r1} 0 ${large} 1 ${pt(r1, a1)}L${pt(r0, a1)}A${r0},${r0} 0 ${large} 0 ${pt(r0, a0)}Z`;
+  }
+
+  function renderDonut(tract) {
+    const p = panels[tract];
+    const y = state.year[tract];
+    const S = 220, cx = 110, cy = 110, r1 = 104, r0 = 66;
+    const root = svg("svg", { viewBox: `0 0 ${S} ${S}`, role: "img", "aria-label": `${TRACTS[tract].title}, ${yearLabel(y)}: pathogen shares` });
+    const ents = entities(tract, y).filter((e) => e.value > 0);
+    let a = -Math.PI / 2;
+    const center = svg("g", { "pointer-events": "none" });
+    const setCenter = (big, small, small2, italic = false) => {
+      center.replaceChildren();
+      const t1 = svg("text", { x: cx, y: small2 ? cy - 2 : cy + 4, "text-anchor": "middle", style: "font-family:var(--font-data);font-size:24px;font-weight:500;fill:var(--ink)" });
+      t1.textContent = big;
+      const nameStyle = `font-family:var(--font-ui);font-size:11px;fill:var(--ink-3)${italic ? ";font-style:italic" : ""}`;
+      const t2 = svg("text", { x: cx, y: small2 ? cy + 16 : cy + 24, "text-anchor": "middle", style: nameStyle });
+      t2.textContent = small;
+      center.append(t1, t2);
+      if (small2) {
+        const t3 = svg("text", { x: cx, y: cy + 30, "text-anchor": "middle", style: nameStyle });
+        t3.textContent = small2;
+        center.append(t3);
+      }
+    };
+    const split = (s) => {
+      if (s.length <= 22) return [s, ""];
+      const mid = s.lastIndexOf(" ", 22);
+      return mid > 0 ? [s.slice(0, mid), s.slice(mid + 1)] : [s, ""];
+    };
+    const resting = () => {
+      const f = state.focus && ents.find((e) => e.key === state.focus);
+      if (f) { const [l1, l2] = split(plainName(f.key)); setCenter(`${fmt(f.value, 1)}%`, l1, l2, ITALIC_FULL.has(f.key)); }
+      else setCenter(yearLabel(y), "share of identified", "infections");
+    };
+    ents.forEach((e) => {
+      const a1 = a + (e.value / 100) * Math.PI * 2;
+      const path = svg("path", {
+        d: arcPath(cx, cy, r0, r1, a, a1),
+        class: `slice${isDim(e.key) ? " dimmed" : ""}`,
+        style: `fill:${colorVar(e.key)};stroke:var(--surface);stroke-width:2;stroke-linejoin:round;cursor:pointer`,
+        tabindex: "0", role: "button",
+        "aria-label": `${plainName(e.key)}: ${fmt(e.value, 2)}%`,
+      });
+      const mid = [a, a1];
+      const enter = (ev) => {
+        path.setAttribute("d", arcPath(cx, cy, r0, r1 + 5, mid[0], mid[1]));
+        const [l1, l2] = split(plainName(e.key));
+        setCenter(`${fmt(e.value, 1)}%`, l1, l2, ITALIC_FULL.has(e.key));
+        showTip(ev, { value: e.value, key: e.key, ctx: `${TRACTS[tract].title.split(" ")[0]} tract · ${yearLabel(y)}`, members: e.members, tract, year: y });
+      };
+      const leave = () => { path.setAttribute("d", arcPath(cx, cy, r0, r1, mid[0], mid[1])); resting(); hideTip(); };
+      path.addEventListener("pointerenter", enter);
+      path.addEventListener("pointermove", (ev) => place(ev));
+      path.addEventListener("pointerleave", leave);
+      path.addEventListener("focus", () => enter(path));
+      path.addEventListener("blur", leave);
+      path.addEventListener("click", () => setFocus(e.key));
+      path.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); setFocus(e.key); } });
+      root.append(path);
+      a = a1;
+    });
+    resting();
+    root.append(center);
+    p.donut.replaceChildren(root);
+  }
+
+  function renderRanked(tract) {
+    const p = panels[tract];
+    const y = state.year[tract];
+    const ents = entities(tract, y).filter((e) => e.value > 0);
+    const shown = roundTo100(ents.map((e) => e.value), 1);
+    const rows = ents.map((e, i) => ({ ...e, shown: shown[i] }))
+      .sort((a, b) => (a.key === "other") - (b.key === "other") || b.value - a.value);
+    p.ranked.replaceChildren();
+    rows.forEach((r) => {
+      const cls = `rk${isDim(r.key) ? " dim" : ""}${state.focus === r.key ? " on" : ""}`;
+      p.ranked.append(el("li", {}, el("button", { type: "button", class: cls, "aria-pressed": String(state.focus === r.key), onclick: () => setFocus(r.key) },
+        el("span", { class: "sw", style: `background:${colorVar(r.key)}` }),
+        el("span", { class: "nm" }, nameNode(r.key, { short: true })),
+        el("span", { class: "num", text: r.shown.toFixed(1) }))));
+    });
+    p.ranked.append(el("li", { class: "total" }, el("span"), el("span", { text: "Total, %" }), el("span", { class: "num", text: "100.0" })));
+  }
+
+  function topRoundedRect(x, y, w, h, r) {
+    r = Math.min(r, h, w / 2);
+    return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
+  }
+
+  function renderBars(tract) {
+    const p = panels[tract];
+    const W = Math.max(280, Math.floor(p.bars.clientWidth));
+    const focusRow = state.focus ? 18 : 0;
+    const m = { l: 34, r: 4, t: 10, b: 26 + focusRow };
+    const plotH = 200;
+    const H = m.t + plotH + m.b;
+    const plotW = W - m.l - m.r;
+    const band = plotW / YEARS.length;
+    const barW = Math.min(24, Math.max(10, band * 0.6));
+    const base = m.t + plotH;
+    const root = svg("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: "group", "aria-label": `${TRACTS[tract].title}: share by year, 2015 to 2026` });
+
+    // grid + y ticks
+    [0, 25, 50, 75, 100].forEach((t) => {
+      const yy = base - (t / 100) * plotH;
+      root.append(svg("line", { x1: m.l, x2: W - m.r, y1: yy, y2: yy, style: `stroke:${t === 0 ? "var(--axis)" : "var(--grid)"};stroke-width:1`, "shape-rendering": "crispEdges" }));
+      const tx = svg("text", { x: m.l - 6, y: yy + 3.5, "text-anchor": "end", class: "axis-text" });
+      tx.textContent = t === 100 ? "100%" : String(t);
+      root.append(tx);
+    });
+
+    const sel = state.year[tract];
+    const shortLabels = band < 40;
+    YEARS.forEach((year, i) => {
+      const x0 = m.l + i * band;
+      const bx = x0 + (band - barW) / 2;
+      const g = svg("g", { class: "col", tabindex: "0", role: "button", "aria-pressed": String(year === sel), "aria-label": `Show ${yearLabel(year)}`, "data-year": year });
+      if (year === sel) g.append(svg("rect", { x: x0 + 1, y: m.t - 6, width: band - 2, height: plotH + 26, rx: 6, style: "fill:var(--sel)" }));
+      const ring = svg("rect", { class: "ring", x: x0 + 1, y: m.t - 6, width: band - 2, height: plotH + 26, rx: 6, style: "fill:none;stroke:none" });
+      g.append(svg("rect", { class: "hit", x: x0, y: m.t - 6, width: band, height: plotH + m.b + 6 }), ring);
+
+      let ents = entities(tract, year);
+      if (state.focus) {
+        const f = ents.findIndex((e) => e.key === state.focus);
+        if (f > 0) ents = [ents[f], ...ents.slice(0, f), ...ents.slice(f + 1)];
+      }
+      const visible = ents.filter((e) => e.value > 0);
+      let acc = 0;
+      visible.forEach((e, k) => {
+        const h = (e.value / 100) * plotH;
+        const yTop = base - acc - h;
+        const yBot = base - acc;
+        acc += h;
+        const top = yTop + (k < visible.length - 1 ? 1 : 0);
+        const bot = yBot - (k > 0 ? 1 : 0);
+        const hh = bot - top;
+        if (hh <= 0.25) return;
+        const isTop = k === visible.length - 1;
+        const shape = isTop
+          ? svg("path", { d: topRoundedRect(bx, top, barW, hh, 4) })
+          : svg("rect", { x: bx, y: top, width: barW, height: hh });
+        shape.setAttribute("class", `seg${isDim(e.key) ? " dimmed" : ""}`);
+        shape.setAttribute("style", `fill:${colorVar(e.key)}`);
+        shape.addEventListener("pointerenter", (ev) => showTip(ev, { value: e.value, key: e.key, ctx: `${TRACTS[tract].title.split(" ")[0]} tract · ${yearLabel(year)} · click to show this year`, members: e.members, tract, year }));
+        shape.addEventListener("pointermove", (ev) => place(ev));
+        shape.addEventListener("pointerleave", hideTip);
+        g.append(shape);
+      });
+
+      const lx = x0 + band / 2;
+      const label = svg("text", { x: lx, y: base + 16, "text-anchor": "middle", class: `axis-text${year === sel ? " sel" : ""}` });
+      label.textContent = shortLabels ? `’${String(year).slice(2)}${year === LAST ? "*" : ""}` : yearLabel(year);
+      g.append(label);
+      if (state.focus) {
+        const v = entities(tract, year).find((e) => e.key === state.focus).value;
+        const ft = svg("text", { x: lx, y: base + 33, "text-anchor": "middle", class: "focus-text" });
+        ft.textContent = band < 34 ? fmt(v, 0) : fmt(v, 1);
+        g.append(ft);
+      }
+
+      g.addEventListener("click", () => selectYear(tract, year));
+      g.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); selectYear(tract, year); refocus(tract, year); }
+        else if (ev.key === "ArrowLeft" || ev.key === "ArrowRight") {
+          ev.preventDefault(); ev.stopPropagation();
+          const ny = Math.max(FIRST, Math.min(LAST, year + (ev.key === "ArrowLeft" ? -1 : 1)));
+          selectYear(tract, ny); refocus(tract, ny);
+        }
+      });
+      g.addEventListener("focus", () => { state.active = tract; });
+      root.append(g);
+    });
+    p.bars.replaceChildren(root);
+  }
+  function refocus(tract, year) {
+    const n = panels[tract].bars.querySelector(`.col[data-year="${year}"]`);
+    if (n) n.focus();
+  }
+
+  // ---------- table ----------
+  function renderTable() {
+    const yu = state.year.upper, yl = state.year.lower;
+    document.getElementById("th-upper").textContent = `Upper, ${yearLabel(yu)}`;
+    document.getElementById("th-lower").textContent = `Lower, ${yearLabel(yl)}`;
+    document.getElementById("table-sub").textContent = state.linked
+      ? `Shares for ${yearLabel(yu)}, to two decimals. Click a row to follow that pathogen.`
+      : `Upper tract ${yearLabel(yu)}, lower tract ${yearLabel(yl)}. Click a row to follow that pathogen.`;
+    const tbody = document.querySelector("#table tbody");
+    tbody.replaceChildren();
+    GROUPS.forEach((g) => {
+      const ids = P.filter((p) => p.type === g.type).map((p) => p.id);
+      const su = ids.reduce((s, id) => s + val("upper", yu, id), 0);
+      const sl = ids.reduce((s, id) => s + val("lower", yl, id), 0);
+      tbody.append(el("tr", { class: "grp" }, el("td", { text: g.label }), el("td", { class: "v", text: cellText(su, "upper", yu, ids) }), el("td", { class: "v", text: cellText(sl, "lower", yl, ids) })));
+      ids.sort((a, b) => val("lower", yl, b) + val("upper", yu, b) - (val("lower", yl, a) + val("upper", yu, a)));
+      ids.forEach((id) => {
+        const swColor = COLORED.includes(id) ? colorVar(id) : (state.focus === id ? "var(--c-focus)" : "var(--c-other)");
+        const tr = el("tr", {
+          class: `row${state.focus === id ? " on" : ""}`, tabindex: "0", "aria-pressed": String(state.focus === id),
+          onclick: () => setFocus(id),
+          onkeydown: (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); setFocus(id); } },
+        },
+          el("td", {}, el("span", { class: "pname" }, el("span", { class: "sw", style: `background:${swColor}` }), el("span", {}, nameNode(id))),
+            BYID[id].note ? el("span", { class: "pnote", text: BYID[id].note }) : null),
+          el("td", { class: "v", text: cellText(val("upper", yu, id), "upper", yu, [id]) }),
+          el("td", { class: "v", text: cellText(val("lower", yl, id), "lower", yl, [id]) }));
+        tbody.append(tr);
+      });
+    });
+  }
+
+  function render() {
+    renderLegend();
+    renderPanel("upper");
+    renderPanel("lower");
+    renderTable();
+  }
+
+  // ---------- wiring ----------
+  document.getElementById("link-years").addEventListener("change", (ev) => {
+    state.linked = ev.target.checked;
+    if (state.linked) { const y = state.year[state.active]; state.year.upper = y; state.year.lower = y; }
+    render();
+  });
+  document.getElementById("focus-clear").addEventListener("click", () => { state.focus = null; render(); });
+  document.addEventListener("keydown", (ev) => {
+    if (ev.defaultPrevented || ev.altKey || ev.metaKey || ev.ctrlKey) return;
+    const t = ev.target;
+    if (t && (t.closest("input, select, textarea, button, [role=button], tr.row"))) return;
+    if (ev.key === "ArrowLeft") selectYear(state.active, state.year[state.active] - 1);
+    else if (ev.key === "ArrowRight") selectYear(state.active, state.year[state.active] + 1);
+    else if (ev.key === "Escape" && state.focus) { state.focus = null; render(); }
+  });
+  window.addEventListener("scroll", hideTip, { passive: true });
+
+  buildPanels();
+  render();
+})();
+</script>
+</body>
+</html>

@@ -17,7 +17,7 @@ Oct-Dec (RSV, seasonal coronaviruses) carry less weight that year.
 
 Outputs
 -------
-  estimates.csv   long-format table: year, tract, pathogen, share_pct
+  estimates.csv   long-format table: year, tract, pathogen, share_pct, est_illnesses
   index.html      the block between DATA:START / DATA:END markers is rewritten
 
 Usage:  python3 build_estimates.py
@@ -180,6 +180,30 @@ ACTIVITY = {
 LOWER_MODIFIER = {"rsv": {2024: 0.90, 2025: 0.85, 2026: 0.85}}
 
 
+# ---------------------------------------------------------------------------
+# Case counts. Shares are turned into estimated illness counts by anchoring each
+# tract to CDC's influenza illness estimates: in the upper tract every influenza
+# illness counts once, and in the lower tract LRTI_SHARE_OF_FLU of them involve
+# the lower airways. One model unit therefore equals a fixed number of illnesses.
+# US resident population (Census Bureau July 1 estimates; 2025-26 approximate)
+# is used to express the totals per person.
+# ---------------------------------------------------------------------------
+LRTI_SHARE_OF_FLU = 0.15
+US_POP_M = {
+    2015: 320.7, 2016: 323.1, 2017: 325.1, 2018: 326.8, 2019: 328.3, 2020: 331.6,
+    2021: 332.1, 2022: 334.0, 2023: 336.8, 2024: 340.1, 2025: 341.8, 2026: 343.3,
+}
+
+
+def illnesses_per_unit(tract):
+    """Millions of illnesses represented by one model unit in a tract."""
+    a_base, b_base = flu_baseline_split()
+    flu_m = a_base + b_base
+    if tract == "lower":
+        flu_m *= LRTI_SHARE_OF_FLU
+    return flu_m / FLU_BASELINE_SHARE[tract]
+
+
 def flu_baseline_split():
     yrs = range(2015, 2020)
     a = sum(FLU_ILLNESS_M[y][0] for y in yrs) / 5
@@ -237,22 +261,26 @@ def build():
         t: {y: [pid for pid, *_ in PATHOGENS if raw[t][y][pid] > 0 and shares[t][y][pid] == 0] for y in YEARS}
         for t in raw
     }
-    return shares, trace
+    cases = {
+        t: {y: {pid: round(v * illnesses_per_unit(t) * 1e6) for pid, v in raw[t][y].items()} for y in YEARS}
+        for t in raw
+    }
+    return shares, trace, cases
 
 
-def write_csv(shares):
+def write_csv(shares, cases):
     path = HERE / "estimates.csv"
     with path.open("w", newline="") as fh:
         w = csv.writer(fh)
-        w.writerow(["year", "tract", "pathogen_id", "pathogen", "type", "share_pct"])
+        w.writerow(["year", "tract", "pathogen_id", "pathogen", "type", "share_pct", "est_illnesses"])
         for t in ("upper", "lower"):
             for y in YEARS:
                 for pid, name, ptype, _ in PATHOGENS:
-                    w.writerow([y, t, pid, name, ptype, f"{shares[t][y][pid]:.2f}"])
+                    w.writerow([y, t, pid, name, ptype, f"{shares[t][y][pid]:.2f}", cases[t][y][pid]])
     return path
 
 
-def write_html(shares, trace):
+def write_html(shares, trace, cases):
     path = HERE / "index.html"
     payload = {
         "years": YEARS,
@@ -265,6 +293,11 @@ def write_html(shares, trace):
             for t in shares
         },
         "trace": {t: {str(y): trace[t][y] for y in YEARS} for t in trace},
+        "cases": {
+            t: {str(y): [cases[t][y][pid] for pid, *_ in PATHOGENS] for y in YEARS}
+            for t in cases
+        },
+        "population": {str(y): round(US_POP_M[y] * 1e6) for y in YEARS},
     }
     block = "/* DATA:START */\nconst DATA = " + json.dumps(payload, separators=(",", ":")) + ";\n/* DATA:END */"
     html = path.read_text()
@@ -276,7 +309,7 @@ def write_html(shares, trace):
 
 
 if __name__ == "__main__":
-    shares, trace = build()
-    print("wrote", write_csv(shares))
+    shares, trace, cases = build()
+    print("wrote", write_csv(shares, cases))
     if (HERE / "index.html").exists():
-        print("wrote", write_html(shares, trace))
+        print("wrote", write_html(shares, trace, cases))

@@ -175,37 +175,59 @@ button { font: inherit; color: inherit; }
 }
 .year-note .num { color: var(--ink); font-weight: 500; flex: none; }
 
-.composition { display: flex; flex-wrap: wrap; gap: 18px 22px; align-items: center; }
-.donut-wrap { flex: none; width: 220px; max-width: 100%; margin-inline: auto; }
-.donut-wrap svg { display: block; width: 100%; height: auto; overflow: visible; }
-.ranked { flex: 1 1 220px; min-width: 0; list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
-.ranked li { min-width: 0; }
-.rk {
-  width: 100%; display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; gap: 9px; align-items: center;
+/* Selected-year ranked bars (inside each panel) */
+.share-bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; min-width: 0; }
+.sb {
+  width: 100%; display: grid; grid-template-columns: minmax(0, 11.5rem) minmax(0, 1fr) 3.4rem; gap: 10px; align-items: center;
   border: 0; background: transparent; padding: 3px 6px; border-radius: 5px; cursor: pointer; text-align: left;
   font-size: var(--step--1); color: var(--ink-2);
 }
-.rk:hover { background: var(--surface-2); color: var(--ink); }
-.rk .nm { overflow-wrap: anywhere; }
-.rk .num { color: var(--ink); }
-.rk.dim { opacity: 0.4; }
-.rk.on { background: var(--surface-2); color: var(--ink); }
-.ranked .total { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; gap: 9px; padding: 5px 6px 0; margin-top: 3px;
-  border-top: 1px solid var(--grid); font-size: var(--step--1); color: var(--ink-3); }
-.ranked .total .num { color: var(--ink-2); }
+.sb:hover { background: var(--surface-2); color: var(--ink); }
+.sb.on { background: var(--surface-2); color: var(--ink); }
+.sb.dim { opacity: 0.4; }
+.sb .nm { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.sb .nm > span:last-child { overflow-wrap: anywhere; }
+.sb .track { position: relative; height: 14px; }
+.sb .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 0 4px 4px 0; min-width: 1px; }
+.sb .num { color: var(--ink); text-align: right; }
+.share-axis { display: grid; grid-template-columns: minmax(0, 11.5rem) minmax(0, 1fr) 3.4rem; gap: 10px; padding: 4px 6px 0;
+  border-top: 1px solid var(--grid); font-size: 0.75rem; color: var(--ink-3); margin-top: 4px; }
+.share-axis .ticks { position: relative; height: 1.2em; font-family: var(--font-data); }
+.share-axis .ticks span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.share-axis .ticks span:first-child { transform: none; }
+.share-axis .num { text-align: right; color: var(--ink-2); }
 
+/* Full-width year stacks */
+.years-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; display: grid; gap: 18px; min-width: 0; }
 .bars-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; }
 .bars-head .panel-sub { margin: 0; }
-.bars { position: relative; width: 100%; min-width: 0; }
-.bars svg { display: block; width: 100%; overflow: visible; }
-.col { cursor: pointer; outline: none; }
-.col .hit { fill: transparent; }
-.col:focus-visible .ring { stroke: var(--accent); stroke-width: 2; }
-.axis-text { font-family: var(--font-data); font-size: 11px; fill: var(--ink-3); }
-.axis-text.sel { fill: var(--ink); font-weight: 500; }
-.focus-text { font-family: var(--font-data); font-size: 10.5px; fill: var(--ink); }
-.seg, .slice { transition: opacity 120ms ease; }
+.tract-block { display: grid; gap: 4px; min-width: 0; }
+.tract-block h3 { margin-bottom: 4px; }
+.yr {
+  display: grid; grid-template-columns: 3.6rem minmax(0, 1fr); gap: 10px; align-items: center;
+  padding: 3px 6px; border-radius: 6px; cursor: pointer; outline: none;
+}
+.yr.with-focus { grid-template-columns: 3.6rem minmax(0, 1fr) 3.4rem; }
+.yr:hover { background: var(--surface-2); }
+.yr.sel { background: var(--sel); }
+.yr:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
+.yr .yl { font-family: var(--font-data); font-size: var(--step--1); color: var(--ink-3); }
+.yr.sel .yl { color: var(--ink); font-weight: 500; }
+.yr .fv { font-family: var(--font-data); font-size: var(--step--1); color: var(--ink); text-align: right; }
+.stack { position: relative; height: 28px; }
+.seg {
+  position: absolute; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; overflow: visible;
+  font-family: var(--font-data); font-size: 11px; font-weight: 500; white-space: nowrap; transition: opacity 120ms ease;
+}
+.seg.last { border-radius: 0 4px 4px 0; }
 .dimmed { opacity: 0.2; }
+.stack-axis { display: grid; grid-template-columns: 3.6rem minmax(0, 1fr); gap: 10px; padding: 0 6px; }
+.stack-axis.with-focus { grid-template-columns: 3.6rem minmax(0, 1fr) 3.4rem; }
+.stack-axis .ticks { position: relative; height: 1.3em; border-top: 1px solid var(--axis); font-family: var(--font-data); font-size: 11px; color: var(--ink-3); }
+.stack-axis .ticks span { position: absolute; top: 2px; transform: translateX(-50%); }
+.stack-axis .ticks span:first-child { transform: none; }
+.stack-axis .ticks span:last-child { transform: translateX(-100%); }
+.stack-axis .fh { font-family: var(--font-data); font-size: 11px; color: var(--ink-3); text-align: right; }
 
 /* Table */
 .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; display: grid; gap: 12px; min-width: 0; }
@@ -240,11 +262,12 @@ footer { color: var(--ink-3); font-size: var(--step--1); border-top: 1px solid v
 .tip .tv { font-family: var(--font-data); font-size: var(--step-1); font-weight: 500; display: flex; align-items: center; gap: 8px; }
 .tip .tv .key { width: 14px; height: 3px; border-radius: 2px; flex: none; }
 .tip .tl { color: var(--ink-2); margin-top: 2px; }
+.tip .tn { color: var(--ink); font-family: var(--font-data); margin-top: 2px; }
 .tip .tc { color: var(--ink-3); font-size: 0.75rem; margin-top: 4px; font-family: var(--font-data); }
 .tip ul { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 2px; color: var(--ink-2); font-size: 0.75rem; }
 .tip ul li { display: flex; justify-content: space-between; gap: 10px; }
 
-@media (prefers-reduced-motion: reduce) { .seg, .slice { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .seg { transition: none; } }
 </style>
 </head>
 <body>
@@ -273,16 +296,24 @@ footer { color: var(--ink-3); font-size: var(--step--1); border-top: 1px solid v
 
   <main class="panels" id="panels"></main>
 
+  <section class="years-card" aria-labelledby="years-title">
+    <div class="bars-head">
+      <h2 id="years-title">Share by year</h2>
+      <p class="panel-sub" id="years-sub"></p>
+    </div>
+    <div id="years"></div>
+  </section>
+
   <section class="table-card" aria-labelledby="table-title">
     <div class="bars-head">
-      <h2 id="table-title">Every pathogen, by tract</h2>
+      <h2 id="table-title">Every pathogen, by tract: estimated illnesses [share]</h2>
       <p class="panel-sub" id="table-sub"></p>
     </div>
     <div class="table-scroll">
       <table id="table">
         <thead><tr><th scope="col">Pathogen</th><th scope="col" class="v" id="th-upper">Upper</th><th scope="col" class="v" id="th-lower">Lower</th></tr></thead>
         <tbody></tbody>
-        <tfoot><tr><td>Total</td><td class="v">100.00%</td><td class="v">100.00%</td></tr></tfoot>
+        <tfoot><tr><td>Total</td><td class="v" id="tot-upper"></td><td class="v" id="tot-lower"></td></tr></tfoot>
       </table>
     </div>
   </section>
@@ -297,6 +328,7 @@ footer { color: var(--ink-3); font-size: var(--step--1); border-top: 1px solid v
       <h3>What a share means</h3>
       <p>A share is the fraction of symptomatic illnesses with a known cause. It is not test positivity, and it is not deaths. Illnesses with no identified pathogen are left out, which is roughly a quarter of colds and over half of adult pneumonias. A co-infection is counted once, under its main pathogen.</p>
       <p><strong>Upper tract:</strong> colds, sore throat, sinusitis, ear infections and croup (ICD-10 J00–J06, H65–H66). <strong>Lower tract:</strong> bronchiolitis, acute bronchitis and pneumonia (J09–J22).</p>
+      <p><strong>Illness counts:</strong> each share is turned into a number of illnesses by anchoring it to CDC’s influenza estimates. Every flu illness counts once in the upper tract, and 15% of them count in the lower tract, so one share point of each tract stands for a fixed number of illnesses. That comes to about 1 identified-cause upper tract illness per US resident per year and about 30 million lower tract illnesses. Population figures are Census Bureau estimates. Counts are rounded to the nearest 1,000.</p>
       <p>These are modeled estimates. The large categories are uncertain by a few percentage points. The 2026 values cover January to September, and the July–September portion partly relies on assumptions.</p>
     </section>
     <section>
@@ -327,7 +359,7 @@ footer { color: var(--ink-3); font-size: var(--step--1); border-top: 1px solid v
 
 <script>
 /* DATA:START */
-const DATA = {"years":[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],"pathogens":[{"id":"rhino","name":"Rhinovirus / enterovirus","type":"virus","note":"Rhinovirus A-C, EV-D68 and other enteroviruses"},{"id":"fluA","name":"Influenza A","type":"virus","note":"H1N1pdm09 and H3N2"},{"id":"fluB","name":"Influenza B","type":"virus","note":"Victoria lineage (Yamagata not detected since 2020)"},{"id":"sars2","name":"SARS-CoV-2","type":"virus","note":"COVID-19, from 2020"},{"id":"rsv","name":"RSV","type":"virus","note":"Respiratory syncytial virus A and B"},{"id":"hmpv","name":"Human metapneumovirus","type":"virus","note":"hMPV"},{"id":"piv","name":"Parainfluenza viruses","type":"virus","note":"HPIV 1-4"},{"id":"adeno","name":"Adenovirus","type":"virus","note":"Species B, C and E"},{"id":"hcov","name":"Seasonal coronaviruses","type":"virus","note":"229E, NL63, OC43, HKU1"},{"id":"spn","name":"Streptococcus pneumoniae","type":"bacteria","note":"Pneumococcus"},{"id":"gas","name":"Streptococcus pyogenes","type":"bacteria","note":"Group A strep"},{"id":"hflu","name":"Haemophilus influenzae","type":"bacteria","note":"Mostly nontypeable"},{"id":"mcat","name":"Moraxella catarrhalis","type":"bacteria","note":""},{"id":"mpn","name":"Mycoplasma pneumoniae","type":"bacteria","note":"Now also named Mycoplasmoides pneumoniae"},{"id":"cpn","name":"Chlamydia pneumoniae","type":"bacteria","note":""},{"id":"bper","name":"Bordetella pertussis","type":"bacteria","note":"Whooping cough"},{"id":"leg","name":"Legionella spp.","type":"bacteria","note":"Legionnaires' disease and Pontiac fever"},{"id":"sau","name":"Staphylococcus aureus","type":"bacteria","note":"MSSA and MRSA"},{"id":"gnb","name":"Gram-negative bacilli","type":"bacteria","note":"Klebsiella, Pseudomonas, E. coli and others"},{"id":"fnec","name":"Fusobacterium necrophorum","type":"bacteria","note":"Adolescent and young-adult pharyngitis"},{"id":"gcs","name":"Group C/G streptococci","type":"bacteria","note":"Streptococcus dysgalactiae"},{"id":"mtb","name":"Mycobacterium tuberculosis","type":"bacteria","note":"Tuberculosis"},{"id":"cocci","name":"Coccidioides spp.","type":"fungi","note":"Valley fever"},{"id":"histo","name":"Histoplasma capsulatum","type":"fungi","note":"Histoplasmosis"},{"id":"pjp","name":"Pneumocystis jirovecii","type":"fungi","note":"Classed as a protozoan until the 1980s"},{"id":"asp","name":"Aspergillus spp.","type":"fungi","note":"Including COVID-associated aspergillosis"},{"id":"blasto","name":"Blastomyces spp.","type":"fungi","note":"Blastomycosis"},{"id":"mucor","name":"Mucorales","type":"fungi","note":"Mucormycosis, mostly rhino-sinus"},{"id":"proto","name":"Protozoa","type":"protozoa","note":"Toxoplasma, Cryptosporidium, Leishmania and others"}],"shares":{"upper":{"2015":[42.1,4.12,1.6,0.0,5.0,3.16,5.53,5.26,11.58,3.83,6.5,4.74,2.1,1.26,0.53,0.48,0.04,0.32,0.11,0.84,0.84,0.01,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2016":[41.39,5.78,2.3,0.0,5.17,3.11,4.92,5.17,10.81,3.69,6.53,4.66,2.07,1.3,0.52,0.41,0.04,0.31,0.1,0.83,0.83,0.01,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2017":[39.98,6.97,2.75,0.0,5.0,2.85,5.25,5.0,11.55,3.5,6.5,4.5,2.0,1.14,0.5,0.41,0.05,0.3,0.1,0.8,0.8,0.0,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2018":[41.12,7.12,3.65,0.0,4.9,3.08,4.65,4.9,10.23,3.36,6.56,4.41,1.96,1.18,0.49,0.33,0.06,0.29,0.1,0.78,0.78,0.0,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2019":[39.32,8.11,2.73,0.0,5.16,2.95,4.91,4.91,11.35,3.3,6.71,4.42,1.97,1.18,0.49,0.4,0.06,0.3,0.1,0.79,0.79,0.0,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2020":[36.83,5.61,2.38,25.52,2.59,2.24,2.01,2.88,6.33,2.42,4.11,3.11,1.38,0.48,0.29,0.15,0.06,0.29,0.12,0.55,0.55,0.01,0.0,0.0,0.0,0.08,0.0,0.01,0.0],"2021":[42.24,1.13,0.03,23.79,5.28,1.36,5.28,4.02,4.42,2.46,3.6,3.17,1.41,0.12,0.18,0.05,0.05,0.27,0.11,0.48,0.48,0.0,0.0,0.0,0.0,0.07,0.0,0.0,0.0],"2022":[32.99,6.58,0.12,22.17,5.62,1.91,3.75,4.12,7.84,2.49,5.85,3.21,1.43,0.09,0.19,0.05,0.04,0.23,0.08,0.6,0.6,0.0,0.0,0.0,0.0,0.04,0.0,0.0,0.0],"2023":[37.0,5.5,0.57,9.71,3.93,3.75,4.63,4.63,10.18,3.24,7.82,4.16,1.85,0.55,0.39,0.14,0.05,0.28,0.09,0.74,0.74,0.0,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2024":[37.1,7.64,1.66,6.92,4.2,2.65,4.42,4.42,10.2,3.0,6.31,3.97,1.77,2.76,0.44,0.68,0.05,0.26,0.09,0.71,0.71,0.0,0.0,0.0,0.0,0.04,0.0,0.0,0.0],"2025":[35.12,15.68,0.73,4.02,4.17,3.03,4.39,4.39,9.66,2.89,5.99,3.95,1.76,1.37,0.44,0.55,0.05,0.26,0.09,0.7,0.7,0.01,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2026":[38.73,5.69,4.62,4.09,3.11,3.53,4.84,5.19,9.89,3.1,6.74,4.36,1.94,1.08,0.52,0.39,0.05,0.31,0.1,0.83,0.83,0.01,0.0,0.0,0.0,0.05,0.0,0.0,0.0]},"lower":{"2015":[20.83,7.16,2.78,0.0,15.62,7.68,6.33,4.93,4.93,9.69,0.42,3.29,1.32,5.48,1.65,1.49,0.51,2.41,2.19,0.02,0.06,0.17,0.44,0.28,0.15,0.13,0.03,0.01,0.0],"2016":[19.99,9.8,3.89,0.0,15.79,7.37,5.5,4.74,4.5,9.12,0.41,3.16,1.26,5.52,1.58,1.24,0.5,2.32,2.1,0.02,0.05,0.16,0.42,0.26,0.13,0.13,0.03,0.01,0.0],"2017":[19.29,11.81,4.65,0.0,15.23,6.75,5.86,4.57,4.8,8.63,0.41,3.05,1.22,4.82,1.52,1.26,0.59,2.23,2.03,0.02,0.05,0.15,0.52,0.26,0.12,0.12,0.03,0.01,0.0],"2018":[19.69,11.96,6.13,0.0,14.8,7.25,5.16,4.44,4.22,8.22,0.41,2.96,1.18,4.93,1.48,1.01,0.74,2.17,1.97,0.02,0.05,0.15,0.54,0.25,0.11,0.12,0.03,0.01,0.0],"2019":[18.69,13.52,4.56,0.0,15.49,6.89,5.41,4.43,4.65,8.03,0.41,2.95,1.18,4.92,1.47,1.19,0.71,2.16,1.97,0.02,0.05,0.14,0.64,0.25,0.11,0.12,0.03,0.01,0.0],"2020":[13.04,6.97,2.96,47.55,5.79,3.9,1.65,1.93,1.93,4.37,0.19,1.54,0.62,1.5,0.64,0.34,0.52,1.6,1.8,0.01,0.03,0.1,0.56,0.19,0.1,0.13,0.03,0.01,0.0],"2021":[16.15,1.52,0.04,44.66,12.75,2.55,4.67,2.91,1.46,4.82,0.18,1.7,0.68,0.4,0.43,0.12,0.51,1.6,1.7,0.01,0.02,0.1,0.57,0.2,0.09,0.13,0.02,0.01,0.0],"2022":[13.62,9.54,0.18,35.34,14.67,3.88,3.59,3.23,2.79,5.26,0.31,1.86,0.74,0.33,0.49,0.13,0.41,1.43,1.3,0.01,0.03,0.09,0.42,0.16,0.07,0.09,0.02,0.01,0.0],"2023":[17.45,9.1,0.95,16.87,11.71,8.68,5.05,4.13,4.13,7.81,0.48,2.76,1.1,2.3,1.17,0.42,0.61,2.02,1.84,0.02,0.05,0.14,0.73,0.23,0.1,0.11,0.03,0.01,0.0],"2024":[16.44,11.88,2.58,10.76,10.57,5.77,4.53,3.71,3.89,6.79,0.36,2.47,0.99,10.71,1.24,1.91,0.54,1.81,1.65,0.02,0.04,0.14,0.78,0.21,0.08,0.1,0.02,0.01,0.0],"2025":[15.65,24.51,1.14,6.29,9.97,6.63,4.53,3.71,3.7,6.58,0.35,2.47,0.99,5.35,1.23,1.55,0.57,1.81,1.65,0.02,0.04,0.14,0.7,0.21,0.08,0.1,0.02,0.01,0.0],"2026":[18.71,9.64,7.83,6.93,8.07,8.37,5.42,4.75,4.12,7.65,0.42,2.96,1.18,4.57,1.58,1.2,0.65,2.32,2.11,0.02,0.05,0.18,0.73,0.26,0.11,0.13,0.03,0.01,0.0]}},"trace":{"upper":{"2015":["mucor","proto"],"2016":["mucor","proto"],"2017":["mtb","mucor","proto"],"2018":["mtb","mucor","proto"],"2019":["mtb","mucor","proto"],"2020":["proto"],"2021":["mtb","mucor","proto"],"2022":["mtb","mucor","proto"],"2023":["mtb","mucor","proto"],"2024":["mtb","mucor","proto"],"2025":["mucor","proto"],"2026":["mucor","proto"]},"lower":{"2015":["proto"],"2016":["proto"],"2017":["proto"],"2018":["proto"],"2019":["proto"],"2020":["proto"],"2021":["proto"],"2022":["proto"],"2023":["proto"],"2024":["proto"],"2025":["proto"],"2026":["proto"]}}};
+const DATA = {"years":[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],"pathogens":[{"id":"rhino","name":"Rhinovirus / enterovirus","type":"virus","note":"Rhinovirus A-C, EV-D68 and other enteroviruses"},{"id":"fluA","name":"Influenza A","type":"virus","note":"H1N1pdm09 and H3N2"},{"id":"fluB","name":"Influenza B","type":"virus","note":"Victoria lineage (Yamagata not detected since 2020)"},{"id":"sars2","name":"SARS-CoV-2","type":"virus","note":"COVID-19, from 2020"},{"id":"rsv","name":"RSV","type":"virus","note":"Respiratory syncytial virus A and B"},{"id":"hmpv","name":"Human metapneumovirus","type":"virus","note":"hMPV"},{"id":"piv","name":"Parainfluenza viruses","type":"virus","note":"HPIV 1-4"},{"id":"adeno","name":"Adenovirus","type":"virus","note":"Species B, C and E"},{"id":"hcov","name":"Seasonal coronaviruses","type":"virus","note":"229E, NL63, OC43, HKU1"},{"id":"spn","name":"Streptococcus pneumoniae","type":"bacteria","note":"Pneumococcus"},{"id":"gas","name":"Streptococcus pyogenes","type":"bacteria","note":"Group A strep"},{"id":"hflu","name":"Haemophilus influenzae","type":"bacteria","note":"Mostly nontypeable"},{"id":"mcat","name":"Moraxella catarrhalis","type":"bacteria","note":""},{"id":"mpn","name":"Mycoplasma pneumoniae","type":"bacteria","note":"Now also named Mycoplasmoides pneumoniae"},{"id":"cpn","name":"Chlamydia pneumoniae","type":"bacteria","note":""},{"id":"bper","name":"Bordetella pertussis","type":"bacteria","note":"Whooping cough"},{"id":"leg","name":"Legionella spp.","type":"bacteria","note":"Legionnaires' disease and Pontiac fever"},{"id":"sau","name":"Staphylococcus aureus","type":"bacteria","note":"MSSA and MRSA"},{"id":"gnb","name":"Gram-negative bacilli","type":"bacteria","note":"Klebsiella, Pseudomonas, E. coli and others"},{"id":"fnec","name":"Fusobacterium necrophorum","type":"bacteria","note":"Adolescent and young-adult pharyngitis"},{"id":"gcs","name":"Group C/G streptococci","type":"bacteria","note":"Streptococcus dysgalactiae"},{"id":"mtb","name":"Mycobacterium tuberculosis","type":"bacteria","note":"Tuberculosis"},{"id":"cocci","name":"Coccidioides spp.","type":"fungi","note":"Valley fever"},{"id":"histo","name":"Histoplasma capsulatum","type":"fungi","note":"Histoplasmosis"},{"id":"pjp","name":"Pneumocystis jirovecii","type":"fungi","note":"Classed as a protozoan until the 1980s"},{"id":"asp","name":"Aspergillus spp.","type":"fungi","note":"Including COVID-associated aspergillosis"},{"id":"blasto","name":"Blastomyces spp.","type":"fungi","note":"Blastomycosis"},{"id":"mucor","name":"Mucorales","type":"fungi","note":"Mucormycosis, mostly rhino-sinus"},{"id":"proto","name":"Protozoa","type":"protozoa","note":"Toxoplasma, Cryptosporidium, Leishmania and others"}],"shares":{"upper":{"2015":[42.1,4.12,1.6,0.0,5.0,3.16,5.53,5.26,11.58,3.83,6.5,4.74,2.1,1.26,0.53,0.48,0.04,0.32,0.11,0.84,0.84,0.01,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2016":[41.39,5.78,2.3,0.0,5.17,3.11,4.92,5.17,10.81,3.69,6.53,4.66,2.07,1.3,0.52,0.41,0.04,0.31,0.1,0.83,0.83,0.01,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2017":[39.98,6.97,2.75,0.0,5.0,2.85,5.25,5.0,11.55,3.5,6.5,4.5,2.0,1.14,0.5,0.41,0.05,0.3,0.1,0.8,0.8,0.0,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2018":[41.12,7.12,3.65,0.0,4.9,3.08,4.65,4.9,10.23,3.36,6.56,4.41,1.96,1.18,0.49,0.33,0.06,0.29,0.1,0.78,0.78,0.0,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2019":[39.32,8.11,2.73,0.0,5.16,2.95,4.91,4.91,11.35,3.3,6.71,4.42,1.97,1.18,0.49,0.4,0.06,0.3,0.1,0.79,0.79,0.0,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2020":[36.83,5.61,2.38,25.52,2.59,2.24,2.01,2.88,6.33,2.42,4.11,3.11,1.38,0.48,0.29,0.15,0.06,0.29,0.12,0.55,0.55,0.01,0.0,0.0,0.0,0.08,0.0,0.01,0.0],"2021":[42.24,1.13,0.03,23.79,5.28,1.36,5.28,4.02,4.42,2.46,3.6,3.17,1.41,0.12,0.18,0.05,0.05,0.27,0.11,0.48,0.48,0.0,0.0,0.0,0.0,0.07,0.0,0.0,0.0],"2022":[32.99,6.58,0.12,22.17,5.62,1.91,3.75,4.12,7.84,2.49,5.85,3.21,1.43,0.09,0.19,0.05,0.04,0.23,0.08,0.6,0.6,0.0,0.0,0.0,0.0,0.04,0.0,0.0,0.0],"2023":[37.0,5.5,0.57,9.71,3.93,3.75,4.63,4.63,10.18,3.24,7.82,4.16,1.85,0.55,0.39,0.14,0.05,0.28,0.09,0.74,0.74,0.0,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2024":[37.1,7.64,1.66,6.92,4.2,2.65,4.42,4.42,10.2,3.0,6.31,3.97,1.77,2.76,0.44,0.68,0.05,0.26,0.09,0.71,0.71,0.0,0.0,0.0,0.0,0.04,0.0,0.0,0.0],"2025":[35.12,15.68,0.73,4.02,4.17,3.03,4.39,4.39,9.66,2.89,5.99,3.95,1.76,1.37,0.44,0.55,0.05,0.26,0.09,0.7,0.7,0.01,0.0,0.0,0.0,0.05,0.0,0.0,0.0],"2026":[38.73,5.69,4.62,4.09,3.11,3.53,4.84,5.19,9.89,3.1,6.74,4.36,1.94,1.08,0.52,0.39,0.05,0.31,0.1,0.83,0.83,0.01,0.0,0.0,0.0,0.05,0.0,0.0,0.0]},"lower":{"2015":[20.83,7.16,2.78,0.0,15.62,7.68,6.33,4.93,4.93,9.69,0.42,3.29,1.32,5.48,1.65,1.49,0.51,2.41,2.19,0.02,0.06,0.17,0.44,0.28,0.15,0.13,0.03,0.01,0.0],"2016":[19.99,9.8,3.89,0.0,15.79,7.37,5.5,4.74,4.5,9.12,0.41,3.16,1.26,5.52,1.58,1.24,0.5,2.32,2.1,0.02,0.05,0.16,0.42,0.26,0.13,0.13,0.03,0.01,0.0],"2017":[19.29,11.81,4.65,0.0,15.23,6.75,5.86,4.57,4.8,8.63,0.41,3.05,1.22,4.82,1.52,1.26,0.59,2.23,2.03,0.02,0.05,0.15,0.52,0.26,0.12,0.12,0.03,0.01,0.0],"2018":[19.69,11.96,6.13,0.0,14.8,7.25,5.16,4.44,4.22,8.22,0.41,2.96,1.18,4.93,1.48,1.01,0.74,2.17,1.97,0.02,0.05,0.15,0.54,0.25,0.11,0.12,0.03,0.01,0.0],"2019":[18.69,13.52,4.56,0.0,15.49,6.89,5.41,4.43,4.65,8.03,0.41,2.95,1.18,4.92,1.47,1.19,0.71,2.16,1.97,0.02,0.05,0.14,0.64,0.25,0.11,0.12,0.03,0.01,0.0],"2020":[13.04,6.97,2.96,47.55,5.79,3.9,1.65,1.93,1.93,4.37,0.19,1.54,0.62,1.5,0.64,0.34,0.52,1.6,1.8,0.01,0.03,0.1,0.56,0.19,0.1,0.13,0.03,0.01,0.0],"2021":[16.15,1.52,0.04,44.66,12.75,2.55,4.67,2.91,1.46,4.82,0.18,1.7,0.68,0.4,0.43,0.12,0.51,1.6,1.7,0.01,0.02,0.1,0.57,0.2,0.09,0.13,0.02,0.01,0.0],"2022":[13.62,9.54,0.18,35.34,14.67,3.88,3.59,3.23,2.79,5.26,0.31,1.86,0.74,0.33,0.49,0.13,0.41,1.43,1.3,0.01,0.03,0.09,0.42,0.16,0.07,0.09,0.02,0.01,0.0],"2023":[17.45,9.1,0.95,16.87,11.71,8.68,5.05,4.13,4.13,7.81,0.48,2.76,1.1,2.3,1.17,0.42,0.61,2.02,1.84,0.02,0.05,0.14,0.73,0.23,0.1,0.11,0.03,0.01,0.0],"2024":[16.44,11.88,2.58,10.76,10.57,5.77,4.53,3.71,3.89,6.79,0.36,2.47,0.99,10.71,1.24,1.91,0.54,1.81,1.65,0.02,0.04,0.14,0.78,0.21,0.08,0.1,0.02,0.01,0.0],"2025":[15.65,24.51,1.14,6.29,9.97,6.63,4.53,3.71,3.7,6.58,0.35,2.47,0.99,5.35,1.23,1.55,0.57,1.81,1.65,0.02,0.04,0.14,0.7,0.21,0.08,0.1,0.02,0.01,0.0],"2026":[18.71,9.64,7.83,6.93,8.07,8.37,5.42,4.75,4.12,7.65,0.42,2.96,1.18,4.57,1.58,1.2,0.65,2.32,2.11,0.02,0.05,0.18,0.73,0.26,0.11,0.13,0.03,0.01,0.0]}},"trace":{"upper":{"2015":["mucor","proto"],"2016":["mucor","proto"],"2017":["mtb","mucor","proto"],"2018":["mtb","mucor","proto"],"2019":["mtb","mucor","proto"],"2020":["proto"],"2021":["mtb","mucor","proto"],"2022":["mtb","mucor","proto"],"2023":["mtb","mucor","proto"],"2024":["mtb","mucor","proto"],"2025":["mucor","proto"],"2026":["mucor","proto"]},"lower":{"2015":["proto"],"2016":["proto"],"2017":["proto"],"2018":["proto"],"2019":["proto"],"2020":["proto"],"2021":["proto"],"2022":["proto"],"2023":["proto"],"2024":["proto"],"2025":["proto"],"2026":["proto"]}},"cases":{"upper":{"2015":[135288889,13250000,5150000,0,16065556,10146667,17756667,16911111,37204444,12311289,20885222,15220000,6764444,4058667,1691111,1528764,131907,1014667,338222,2705778,2705778,17588,0,0,0,169111,0,13529,3382],"2016":[135288889,18900000,7500000,0,16911111,10146667,16065556,16911111,35344222,12074533,21324911,15220000,6764444,4261600,1691111,1325831,133598,1014667,338222,2705778,2705778,17080,0,0,0,169111,0,13529,3382],"2017":[135288889,23600000,9300000,0,16911111,9639333,17756667,16911111,39064667,11837778,21984444,15220000,6764444,3855733,1691111,1393476,164038,1014667,338222,2705778,2705778,16742,0,0,0,169111,0,13529,3382],"2018":[142053333,24600000,12600000,0,16911111,10654000,16065556,16911111,35344222,11601022,22643978,15220000,6764444,4058667,1691111,1149956,211389,1014667,338222,2705778,2705778,16573,0,0,0,169111,0,13529,3382],"2019":[135288889,27900000,9400000,0,17756667,10146667,16911111,16911111,39064667,11364267,23083667,15220000,6764444,4058667,1691111,1366418,204624,1014667,338222,2705778,2705778,16404,0,0,0,169111,0,13529,3382],"2020":[108231111,16500000,7000000,75000000,7610000,6595333,5918889,8455556,18602222,7102667,12091444,9132000,4058667,1420533,845556,446453,169111,862467,355133,1623467,1623467,13191,0,0,0,219844,0,13529,3382],"2021":[142053333,3800000,100000,80000000,17756667,4566000,17756667,13528889,14881778,8286444,12091444,10654000,4735111,405867,591889,162347,177567,913200,355133,1623467,1623467,14544,0,0,0,228300,0,16235,3382],"2022":[148817778,29700000,550000,100000000,25366667,8624667,16911111,18602222,35344222,11245889,26381333,14459000,6426222,405867,845556,229991,177567,1014667,338222,2705778,2705778,15389,0,0,0,186022,0,13529,3382],"2023":[135288889,20100000,2100000,35500000,14374444,13698000,16911111,16911111,37204444,11837778,28579778,15220000,6764444,2029333,1437444,514098,186022,1014667,338222,2705778,2705778,17757,0,0,0,169111,0,13529,3382],"2024":[142053333,29250000,6350000,26500000,16065556,10146667,16911111,16911111,39064667,11482644,24182889,15220000,6764444,10552533,1691111,2611076,186022,1014667,338222,2705778,2705778,19110,0,0,0,169111,0,13529,3382],"2025":[135288889,60400000,2800000,15500000,16065556,11668667,16911111,16911111,37204444,11127511,23083667,15220000,6764444,5276267,1691111,2124036,194478,1014667,338222,2705778,2705778,18940,0,0,0,169111,0,13529,3382],"2026":[94702222,13900000,11300000,10000000,7610000,8624667,11837778,12683333,24182889,7576178,16488333,10654000,4735111,2638133,1268333,960551,130216,761000,253667,2029333,2029333,14036,0,0,0,126833,0,10147,2537]},"lower":{"2015":[5783600,1987500,772500,0,4337700,2130800,1757910,1369800,1369800,2690896,115672,913200,365280,1522000,456600,412766,142459,669680,608800,6088,15220,47486,121760,76100,40181,36528,9132,3044,913],"2016":[5783600,2835000,1125000,0,4566000,2130800,1590490,1369800,1301310,2639148,118107,913200,365280,1598100,456600,357974,144286,669680,608800,6088,15220,46117,121760,76100,38354,36528,9132,3044,913],"2017":[5783600,3540000,1395000,0,4566000,2024260,1757910,1369800,1438290,2587400,121760,913200,365280,1445900,456600,376238,177161,669680,608800,6088,15220,45203,156766,76100,36528,36528,9132,3044,913],"2018":[6072780,3690000,1890000,0,4566000,2237340,1590490,1369800,1301310,2535652,125413,913200,365280,1522000,456600,310488,228300,669680,608800,6088,15220,44747,167420,76100,34702,36528,9132,3044,913],"2019":[5783600,4185000,1410000,0,4794300,2130800,1674200,1369800,1438290,2483904,127848,913200,365280,1522000,456600,368933,220994,669680,608800,6088,15220,44290,197860,76100,33606,36528,9132,3044,913],"2020":[4626880,2475000,1050000,16875000,2054700,1385020,585970,684900,684900,1552440,66968,547920,219168,532700,228300,120542,182640,569228,639240,3653,9132,35615,197860,68490,34702,47486,9132,3044,913],"2021":[6072780,570000,15000,16800000,4794300,958860,1757910,1095840,547920,1811180,66968,639240,255696,152200,159810,43834,191772,602712,639240,3653,9132,39268,213080,76100,34702,49313,9132,3653,913],"2022":[6361960,4455000,82500,16500000,6849000,1811180,1674200,1506780,1301310,2458030,146112,867540,347016,152200,228300,62098,191772,669680,608800,6088,15220,41551,197860,76100,32875,40181,9132,3044,913],"2023":[5783600,3015000,315000,5591250,3881100,2876580,1674200,1369800,1369800,2587400,158288,913200,365280,761000,388110,138806,200904,669680,608800,6088,15220,47943,243520,76100,32145,36528,11415,3044,913],"2024":[6072780,4387500,952500,3975000,3903930,2130800,1674200,1369800,1438290,2509778,133936,913200,365280,3957200,456600,704990,200904,669680,608800,6088,15220,51596,289180,76100,31414,36528,9132,3044,913],"2025":[5783600,9060000,420000,2325000,3687045,2450420,1674200,1369800,1369800,2432156,127848,913200,365280,1978600,456600,573490,210036,669680,608800,6088,15220,51139,258740,76100,31049,36528,9132,3044,913],"2026":[4048520,2085000,1695000,1500000,1746495,1811180,1171940,1027350,890370,1655936,91320,639240,255696,989300,342450,259349,140633,502260,456600,4566,11415,37898,158288,57075,23378,27396,6849,2283,685]}},"population":{"2015":320700000,"2016":323100000,"2017":325100000,"2018":326800000,"2019":328300000,"2020":331600000,"2021":332100000,"2022":334000000,"2023":336800000,"2024":340100000,"2025":341800000,"2026":343300000}};
 /* DATA:END */
 
 (() => {
@@ -376,7 +408,12 @@ const DATA = {"years":[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,20
   const val = (tract, year, id) => DATA.shares[tract][String(year)][IDX[id]];
   const isTrace = (tract, year, id) => DATA.trace[tract][String(year)].includes(id);
   // Table cell text: a real value, "<0.01" for trace amounts, or a dash when absent.
-  const cellText = (v, tract, year, ids) => (v > 0 ? `${fmt(v, 2)}%` : ids.some((id) => isTrace(tract, year, id)) ? "<0.01%" : "—");
+  const cellText = (v, tract, year, ids) => {
+    const n = ids.reduce((s, id) => s + DATA.cases[tract][String(year)][IDX[id]], 0);
+    if (n <= 0) return "—";
+    const pct = v > 0 ? `${fmt(v, 2)}%` : ids.some((id) => isTrace(tract, year, id)) ? "<0.01%" : "0%";
+    return `${n < 1000 ? "<1,000" : (Math.round(n / 1000) * 1000).toLocaleString("en-US")} [${pct}]`;
+  };
   const yearLabel = (y) => (y === LAST ? `${y}*` : String(y));
   const colorVar = (key) => (key === "other" ? "var(--c-other)" : COLORED.includes(key) ? `var(--c-${key})` : "var(--c-focus)");
   const el = (tag, attrs = {}, ...kids) => {
@@ -445,11 +482,12 @@ const DATA = {"years":[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,20
 
   // ---------- tooltip ----------
   const tip = document.getElementById("tip");
-  function showTip(anchor, { value, key, ctx, members, tract, year }) {
+  function showTip(anchor, { value, key, ctx, members, tract, year, count }) {
     tip.replaceChildren();
     const tv = el("div", { class: "tv" }, el("span", { class: "key", style: `background:${colorVar(key)}` }), `${fmt(value, 2)}%`);
     const tl = el("div", { class: "tl" }, nameNode(key));
     tip.append(tv, tl);
+    if (count != null) tip.append(el("div", { class: "tn", text: `≈ ${fmtCount(count)} illnesses` }));
     if (key !== "other" && BYID[key] && BYID[key].note) tip.append(el("div", { class: "tc", text: BYID[key].note }));
     if (members) {
       const top = members.map((id) => [id, val(tract, year, id)]).sort((a, b) => b[1] - a[1]).slice(0, 6);
@@ -527,22 +565,36 @@ const DATA = {"years":[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,20
       const next = el("button", { type: "button", "aria-label": "Next year", onclick: () => selectYear(tract, state.year[tract] + 1) });
       next.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M5.5 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       const note = el("p", { class: "year-note" });
-      const donut = el("div", { class: "donut-wrap" });
-      const ranked = el("ol", { class: "ranked", "aria-label": `${t.title} shares` });
-      const bars = el("div", { class: "bars" });
-      const barsSub = el("p", { class: "panel-sub" });
+      const total = el("p", { class: "panel-sub" });
+      const list = el("ol", { class: "share-bars", "aria-label": `${t.title} shares` });
+      const axis = el("div", { class: "share-axis" });
       const panel = el("article", { class: "panel", "aria-labelledby": `h-${tract}` },
         el("div", { class: "panel-head" },
           el("div", {}, el("h2", { id: `h-${tract}`, text: t.title }), el("p", { class: "panel-sub", text: t.sub })),
           el("div", { class: "stepper", role: "group", "aria-label": `${t.title} year` }, prev, out, next)),
         note,
-        el("div", { class: "composition" }, donut, ranked),
-        el("div", { class: "bars-head" }, el("h3", { text: "Share by year" }), barsSub),
-        bars);
+        el("div", {}, list, axis),
+        total);
       panelsEl.append(panel);
-      panels[tract] = { out, prev, next, note, donut, ranked, bars, barsSub };
-      new ResizeObserver(() => renderBars(tract)).observe(bars);
+      panels[tract] = { out, prev, next, note, list, axis, total };
     }
+  }
+
+  const cases = (tract, year, id) => DATA.cases[tract][String(year)][IDX[id]];
+  const entityCases = (tract, year, e) => (e.key === "other" ? e.members.reduce((s, id) => s + cases(tract, year, id), 0) : cases(tract, year, e.key));
+  const tractTotal = (tract, year) => DATA.cases[tract][String(year)].reduce((a, b) => a + b, 0);
+  function fmtCount(n) {
+    if (n <= 0) return "0";
+    if (n < 1000) return "<1,000";
+    return (Math.round(n / 1000) * 1000).toLocaleString("en-US");
+  }
+  const tractWord = (tract) => TRACTS[tract].title.split(" ")[0];
+
+  // Common scale for both panels' ranked bars: the largest share shown, rounded up to 10.
+  function shareScale() {
+    let max = 0;
+    for (const tract of ["upper", "lower"]) entities(tract, state.year[tract]).forEach((e) => { max = Math.max(max, e.value); });
+    return Math.max(10, Math.ceil(max / 10) * 10);
   }
 
   function renderPanel(tract) {
@@ -552,194 +604,116 @@ const DATA = {"years":[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,20
     p.prev.disabled = y <= FIRST;
     p.next.disabled = y >= LAST;
     p.note.replaceChildren(el("span", { class: "num", text: yearLabel(y) }), el("span", { text: EVENTS[y] }));
-    p.barsSub.textContent = state.focus ? `Following ${plainName(state.focus)} · its share is listed under each year` : "Each column adds to 100%";
-    renderDonut(tract);
-    renderRanked(tract);
-    renderBars(tract);
-  }
+    const tot = tractTotal(tract, y);
+    const perPerson = tot / DATA.population[String(y)];
+    p.total.textContent = `About ${(tot / 1e6).toFixed(1)} million illnesses with an identified cause in ${yearLabel(y)}, or ${perPerson.toFixed(2)} per US resident.`;
 
-  function arcPath(cx, cy, r0, r1, a0, a1) {
-    const large = a1 - a0 > Math.PI ? 1 : 0;
-    const pt = (r, a) => `${(cx + r * Math.cos(a)).toFixed(2)},${(cy + r * Math.sin(a)).toFixed(2)}`;
-    return `M${pt(r1, a0)}A${r1},${r1} 0 ${large} 1 ${pt(r1, a1)}L${pt(r0, a1)}A${r0},${r0} 0 ${large} 0 ${pt(r0, a0)}Z`;
-  }
-
-  function renderDonut(tract) {
-    const p = panels[tract];
-    const y = state.year[tract];
-    const S = 220, cx = 110, cy = 110, r1 = 104, r0 = 66;
-    const root = svg("svg", { viewBox: `0 0 ${S} ${S}`, role: "img", "aria-label": `${TRACTS[tract].title}, ${yearLabel(y)}: pathogen shares` });
-    const ents = entities(tract, y).filter((e) => e.value > 0);
-    let a = -Math.PI / 2;
-    const center = svg("g", { "pointer-events": "none" });
-    const setCenter = (big, small, small2, italic = false) => {
-      center.replaceChildren();
-      const t1 = svg("text", { x: cx, y: small2 ? cy - 2 : cy + 4, "text-anchor": "middle", style: "font-family:var(--font-data);font-size:24px;font-weight:500;fill:var(--ink)" });
-      t1.textContent = big;
-      const nameStyle = `font-family:var(--font-ui);font-size:11px;fill:var(--ink-3)${italic ? ";font-style:italic" : ""}`;
-      const t2 = svg("text", { x: cx, y: small2 ? cy + 16 : cy + 24, "text-anchor": "middle", style: nameStyle });
-      t2.textContent = small;
-      center.append(t1, t2);
-      if (small2) {
-        const t3 = svg("text", { x: cx, y: cy + 30, "text-anchor": "middle", style: nameStyle });
-        t3.textContent = small2;
-        center.append(t3);
-      }
-    };
-    const split = (s) => {
-      if (s.length <= 22) return [s, ""];
-      const mid = s.lastIndexOf(" ", 22);
-      return mid > 0 ? [s.slice(0, mid), s.slice(mid + 1)] : [s, ""];
-    };
-    const resting = () => {
-      const f = state.focus && ents.find((e) => e.key === state.focus);
-      if (f) { const [l1, l2] = split(plainName(f.key)); setCenter(`${fmt(f.value, 1)}%`, l1, l2, ITALIC_FULL.has(f.key)); }
-      else setCenter(yearLabel(y), "share of identified", "infections");
-    };
-    ents.forEach((e) => {
-      const a1 = a + (e.value / 100) * Math.PI * 2;
-      const path = svg("path", {
-        d: arcPath(cx, cy, r0, r1, a, a1),
-        class: `slice${isDim(e.key) ? " dimmed" : ""}`,
-        style: `fill:${colorVar(e.key)};stroke:var(--surface);stroke-width:2;stroke-linejoin:round;cursor:pointer`,
-        tabindex: "0", role: "button",
-        "aria-label": `${plainName(e.key)}: ${fmt(e.value, 2)}%`,
-      });
-      const mid = [a, a1];
-      const enter = (ev) => {
-        path.setAttribute("d", arcPath(cx, cy, r0, r1 + 5, mid[0], mid[1]));
-        const [l1, l2] = split(plainName(e.key));
-        setCenter(`${fmt(e.value, 1)}%`, l1, l2, ITALIC_FULL.has(e.key));
-        showTip(ev, { value: e.value, key: e.key, ctx: `${TRACTS[tract].title.split(" ")[0]} tract · ${yearLabel(y)}`, members: e.members, tract, year: y });
-      };
-      const leave = () => { path.setAttribute("d", arcPath(cx, cy, r0, r1, mid[0], mid[1])); resting(); hideTip(); };
-      path.addEventListener("pointerenter", enter);
-      path.addEventListener("pointermove", (ev) => place(ev));
-      path.addEventListener("pointerleave", leave);
-      path.addEventListener("focus", () => enter(path));
-      path.addEventListener("blur", leave);
-      path.addEventListener("click", () => setFocus(e.key));
-      path.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); setFocus(e.key); } });
-      root.append(path);
-      a = a1;
-    });
-    resting();
-    root.append(center);
-    p.donut.replaceChildren(root);
-  }
-
-  function renderRanked(tract) {
-    const p = panels[tract];
-    const y = state.year[tract];
     const ents = entities(tract, y).filter((e) => e.value > 0);
     const shown = roundTo100(ents.map((e) => e.value), 1);
     const rows = ents.map((e, i) => ({ ...e, shown: shown[i] }))
       .sort((a, b) => (a.key === "other") - (b.key === "other") || b.value - a.value);
-    p.ranked.replaceChildren();
+    const scale = shareScale();
+    p.list.replaceChildren();
     rows.forEach((r) => {
-      const cls = `rk${isDim(r.key) ? " dim" : ""}${state.focus === r.key ? " on" : ""}`;
-      p.ranked.append(el("li", {}, el("button", { type: "button", class: cls, "aria-pressed": String(state.focus === r.key), onclick: () => setFocus(r.key) },
-        el("span", { class: "sw", style: `background:${colorVar(r.key)}` }),
-        el("span", { class: "nm" }, nameNode(r.key, { short: true })),
-        el("span", { class: "num", text: r.shown.toFixed(1) }))));
+      const cls = `sb${isDim(r.key) ? " dim" : ""}${state.focus === r.key ? " on" : ""}`;
+      const btn = el("button", { type: "button", class: cls, "aria-pressed": String(state.focus === r.key), onclick: () => setFocus(r.key) },
+        el("span", { class: "nm" }, el("span", { class: "sw", style: `background:${colorVar(r.key)}` }), el("span", {}, nameNode(r.key, { short: true }))),
+        el("span", { class: "track" }, el("span", { class: "fill", style: `width:${(r.value / scale) * 100}%;background:${colorVar(r.key)}` })),
+        el("span", { class: "num", text: `${r.shown.toFixed(1)}%` }));
+      const tipFor = (anchor) => showTip(anchor, { value: r.value, key: r.key, count: entityCases(tract, y, r), ctx: `${tractWord(tract)} tract · ${yearLabel(y)}`, members: r.members, tract, year: y });
+      btn.addEventListener("pointerenter", tipFor);
+      btn.addEventListener("pointermove", (ev) => place(ev));
+      btn.addEventListener("pointerleave", hideTip);
+      btn.addEventListener("focus", () => tipFor(btn));
+      btn.addEventListener("blur", hideTip);
+      p.list.append(el("li", {}, btn));
     });
-    p.ranked.append(el("li", { class: "total" }, el("span"), el("span", { text: "Total, %" }), el("span", { class: "num", text: "100.0" })));
+    const ticks = el("span", { class: "ticks" });
+    for (let t = 0; t <= scale; t += scale > 30 ? 10 : 5) ticks.append(el("span", { style: `left:${(t / scale) * 100}%`, text: t === 0 ? "0" : `${t}%` }));
+    p.axis.replaceChildren(el("span", { text: "Total" }), ticks, el("span", { class: "num", text: "100.0%" }));
   }
 
-  function topRoundedRect(x, y, w, h, r) {
-    r = Math.min(r, h, w / 2);
-    return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
+  // ---------- full-width year stacks ----------
+  const yearsEl = document.getElementById("years");
+  const labelInk = {};
+  function inkFor(key) {
+    // Pick dark or light label text for a label set inside a colored segment.
+    if (labelInk[key]) return labelInk[key];
+    const probe = el("span", { style: `color:${colorVar(key)}` });
+    document.body.append(probe);
+    const [r, g, b] = getComputedStyle(probe).color.match(/\d+/g).map(Number).map((c) => {
+      c /= 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    });
+    probe.remove();
+    const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return (labelInk[key] = (L + 0.05) / 0.05 > 1.05 / (L + 0.05) ? "#101211" : "#ffffff");
   }
 
-  function renderBars(tract) {
-    const p = panels[tract];
-    const W = Math.max(280, Math.floor(p.bars.clientWidth));
-    const focusRow = state.focus ? 18 : 0;
-    const m = { l: 34, r: 4, t: 10, b: 26 + focusRow };
-    const plotH = 200;
-    const H = m.t + plotH + m.b;
-    const plotW = W - m.l - m.r;
-    const band = plotW / YEARS.length;
-    const barW = Math.min(24, Math.max(10, band * 0.6));
-    const base = m.t + plotH;
-    const root = svg("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: "group", "aria-label": `${TRACTS[tract].title}: share by year, 2015 to 2026` });
-
-    // grid + y ticks
-    [0, 25, 50, 75, 100].forEach((t) => {
-      const yy = base - (t / 100) * plotH;
-      root.append(svg("line", { x1: m.l, x2: W - m.r, y1: yy, y2: yy, style: `stroke:${t === 0 ? "var(--axis)" : "var(--grid)"};stroke-width:1`, "shape-rendering": "crispEdges" }));
-      const tx = svg("text", { x: m.l - 6, y: yy + 3.5, "text-anchor": "end", class: "axis-text" });
-      tx.textContent = t === 100 ? "100%" : String(t);
-      root.append(tx);
-    });
-
-    const sel = state.year[tract];
-    const shortLabels = band < 40;
-    YEARS.forEach((year, i) => {
-      const x0 = m.l + i * band;
-      const bx = x0 + (band - barW) / 2;
-      const g = svg("g", { class: "col", tabindex: "0", role: "button", "aria-pressed": String(year === sel), "aria-label": `Show ${yearLabel(year)}`, "data-year": year });
-      if (year === sel) g.append(svg("rect", { x: x0 + 1, y: m.t - 6, width: band - 2, height: plotH + 26, rx: 6, style: "fill:var(--sel)" }));
-      const ring = svg("rect", { class: "ring", x: x0 + 1, y: m.t - 6, width: band - 2, height: plotH + 26, rx: 6, style: "fill:none;stroke:none" });
-      g.append(svg("rect", { class: "hit", x: x0, y: m.t - 6, width: band, height: plotH + m.b + 6 }), ring);
-
-      let ents = entities(tract, year);
-      if (state.focus) {
-        const f = ents.findIndex((e) => e.key === state.focus);
-        if (f > 0) ents = [ents[f], ...ents.slice(0, f), ...ents.slice(f + 1)];
-      }
-      const visible = ents.filter((e) => e.value > 0);
-      let acc = 0;
-      visible.forEach((e, k) => {
-        const h = (e.value / 100) * plotH;
-        const yTop = base - acc - h;
-        const yBot = base - acc;
-        acc += h;
-        const top = yTop + (k < visible.length - 1 ? 1 : 0);
-        const bot = yBot - (k > 0 ? 1 : 0);
-        const hh = bot - top;
-        if (hh <= 0.25) return;
-        const isTop = k === visible.length - 1;
-        const shape = isTop
-          ? svg("path", { d: topRoundedRect(bx, top, barW, hh, 4) })
-          : svg("rect", { x: bx, y: top, width: barW, height: hh });
-        shape.setAttribute("class", `seg${isDim(e.key) ? " dimmed" : ""}`);
-        shape.setAttribute("style", `fill:${colorVar(e.key)}`);
-        shape.addEventListener("pointerenter", (ev) => showTip(ev, { value: e.value, key: e.key, ctx: `${TRACTS[tract].title.split(" ")[0]} tract · ${yearLabel(year)} · click to show this year`, members: e.members, tract, year }));
-        shape.addEventListener("pointermove", (ev) => place(ev));
-        shape.addEventListener("pointerleave", hideTip);
-        g.append(shape);
-      });
-
-      const lx = x0 + band / 2;
-      const label = svg("text", { x: lx, y: base + 16, "text-anchor": "middle", class: `axis-text${year === sel ? " sel" : ""}` });
-      label.textContent = shortLabels ? `’${String(year).slice(2)}${year === LAST ? "*" : ""}` : yearLabel(year);
-      g.append(label);
-      if (state.focus) {
-        const v = entities(tract, year).find((e) => e.key === state.focus).value;
-        const ft = svg("text", { x: lx, y: base + 33, "text-anchor": "middle", class: "focus-text" });
-        ft.textContent = band < 34 ? fmt(v, 0) : fmt(v, 1);
-        g.append(ft);
-      }
-
-      g.addEventListener("click", () => selectYear(tract, year));
-      g.addEventListener("keydown", (ev) => {
-        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); selectYear(tract, year); refocus(tract, year); }
-        else if (ev.key === "ArrowLeft" || ev.key === "ArrowRight") {
-          ev.preventDefault(); ev.stopPropagation();
-          const ny = Math.max(FIRST, Math.min(LAST, year + (ev.key === "ArrowLeft" ? -1 : 1)));
-          selectYear(tract, ny); refocus(tract, ny);
+  function renderYears() {
+    document.getElementById("years-sub").textContent = state.focus
+      ? `Following ${plainName(state.focus)}, shown first in every bar with its share at the right. Click a year to show it above.`
+      : "Each bar adds to 100%. Click a year to show it in the panels above.";
+    yearsEl.replaceChildren();
+    const width = Math.max(200, yearsEl.clientWidth - 120);
+    for (const tract of ["upper", "lower"]) {
+      const block = el("div", { class: "tract-block" }, el("h3", { text: TRACTS[tract].title }));
+      YEARS.forEach((year) => {
+        let ents = entities(tract, year);
+        if (state.focus) {
+          const f = ents.findIndex((e) => e.key === state.focus);
+          if (f > 0) ents = [ents[f], ...ents.slice(0, f), ...ents.slice(f + 1)];
         }
+        const visible = ents.filter((e) => e.value > 0);
+        const stack = el("div", { class: "stack" });
+        let acc = 0;
+        visible.forEach((e, k) => {
+          const isLast = k === visible.length - 1;
+          const left = acc, w = e.value;
+          acc += w;
+          const seg = el("div", {
+            class: `seg${isLast ? " last" : ""}${isDim(e.key) ? " dimmed" : ""}`,
+            style: `left:calc(${left}% + ${k ? 1 : 0}px);width:max(0px, calc(${w}% - ${(k ? 1 : 0) + (isLast ? 0 : 1)}px));background:${colorVar(e.key)};color:${inkFor(e.key)}`,
+          });
+          const px = (w / 100) * width;
+          if (px >= 40) seg.textContent = w >= 10 ? `${Math.round(w)}%` : `${w.toFixed(1)}%`;
+          seg.addEventListener("pointerenter", (ev) => showTip(ev, { value: e.value, key: e.key, count: entityCases(tract, year, e), ctx: `${tractWord(tract)} tract · ${yearLabel(year)}`, members: e.members, tract, year }));
+          seg.addEventListener("pointermove", (ev) => place(ev));
+          seg.addEventListener("pointerleave", hideTip);
+          stack.append(seg);
+        });
+        const sel = state.year[tract] === year;
+        const row = el("div", {
+          class: `yr${sel ? " sel" : ""}${state.focus ? " with-focus" : ""}`, tabindex: "0", role: "button",
+          "aria-pressed": String(sel), "aria-label": `${TRACTS[tract].title}, show ${yearLabel(year)}`, "data-year": year, "data-tract": tract,
+        }, el("span", { class: "yl", text: yearLabel(year) }), stack);
+        if (state.focus) row.append(el("span", { class: "fv", text: `${fmt(ents.find((e) => e.key === state.focus).value, 1)}%` }));
+        row.addEventListener("click", () => selectYear(tract, year));
+        row.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); selectYear(tract, year); refocus(tract, year); }
+          else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(ev.key)) {
+            ev.preventDefault(); ev.stopPropagation();
+            const ny = Math.max(FIRST, Math.min(LAST, year + (ev.key === "ArrowUp" || ev.key === "ArrowLeft" ? -1 : 1)));
+            selectYear(tract, ny); refocus(tract, ny);
+          }
+        });
+        row.addEventListener("focus", () => { state.active = tract; });
+        block.append(row);
       });
-      g.addEventListener("focus", () => { state.active = tract; });
-      root.append(g);
-    });
-    p.bars.replaceChildren(root);
+      const ticks = el("span", { class: "ticks" });
+      [0, 25, 50, 75, 100].forEach((t) => ticks.append(el("span", { style: `left:${t}%`, text: t === 100 ? "100%" : String(t) })));
+      const axis = el("div", { class: `stack-axis${state.focus ? " with-focus" : ""}` }, el("span"), ticks);
+      if (state.focus) axis.append(el("span", { class: "fh", text: "share" }));
+      block.append(axis);
+      yearsEl.append(block);
+    }
   }
   function refocus(tract, year) {
-    const n = panels[tract].bars.querySelector(`.col[data-year="${year}"]`);
+    const n = yearsEl.querySelector(`.yr[data-tract="${tract}"][data-year="${year}"]`);
     if (n) n.focus();
   }
+  new ResizeObserver(() => renderYears()).observe(yearsEl);
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { for (const k in labelInk) delete labelInk[k]; render(); });
+  new MutationObserver(() => { for (const k in labelInk) delete labelInk[k]; render(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
   // ---------- table ----------
   function renderTable() {
@@ -747,8 +721,10 @@ const DATA = {"years":[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,20
     document.getElementById("th-upper").textContent = `Upper, ${yearLabel(yu)}`;
     document.getElementById("th-lower").textContent = `Lower, ${yearLabel(yl)}`;
     document.getElementById("table-sub").textContent = state.linked
-      ? `Shares for ${yearLabel(yu)}, to two decimals. Click a row to follow that pathogen.`
-      : `Upper tract ${yearLabel(yu)}, lower tract ${yearLabel(yl)}. Click a row to follow that pathogen.`;
+      ? `${yearLabel(yu)}. Estimated illnesses, rounded to the nearest 1,000, with the share in brackets. Click a row to follow that pathogen.`
+      : `Upper tract ${yearLabel(yu)}, lower tract ${yearLabel(yl)}. Estimated illnesses with the share in brackets. Click a row to follow that pathogen.`;
+    document.getElementById("tot-upper").textContent = `${(Math.round(tractTotal("upper", yu) / 1000) * 1000).toLocaleString("en-US")} [100.00%]`;
+    document.getElementById("tot-lower").textContent = `${(Math.round(tractTotal("lower", yl) / 1000) * 1000).toLocaleString("en-US")} [100.00%]`;
     const tbody = document.querySelector("#table tbody");
     tbody.replaceChildren();
     GROUPS.forEach((g) => {
@@ -777,6 +753,7 @@ const DATA = {"years":[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,20
     renderLegend();
     renderPanel("upper");
     renderPanel("lower");
+    renderYears();
     renderTable();
   }
 
@@ -790,7 +767,7 @@ const DATA = {"years":[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,20
   document.addEventListener("keydown", (ev) => {
     if (ev.defaultPrevented || ev.altKey || ev.metaKey || ev.ctrlKey) return;
     const t = ev.target;
-    if (t && (t.closest("input, select, textarea, button, [role=button], tr.row"))) return;
+    if (t && t.closest && t.closest("input, select, textarea, button, [role=button], tr.row")) return;
     if (ev.key === "ArrowLeft") selectYear(state.active, state.year[state.active] - 1);
     else if (ev.key === "ArrowRight") selectYear(state.active, state.year[state.active] + 1);
     else if (ev.key === "Escape" && state.focus) { state.focus = null; render(); }

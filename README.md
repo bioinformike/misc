@@ -42,7 +42,7 @@ See [`random_audio_checker/README.md`](random_audio_checker/README.md) for usage
 
 ### `respiratory_pathogen_prevalence/index.html`
 
-An interactive page showing the estimated share of US upper and lower respiratory tract infections caused by each pathogen (viruses, bacteria, fungi and protozoa) for every year from 2015 to 2026. Each tract has a donut chart for the selected year and clickable 100% stacked year columns that share one color legend.
+An interactive page showing the estimated share of US upper and lower respiratory tract infections caused by each pathogen (viruses, bacteria, fungi and protozoa) for every year from 2015 to 2026. Each tract has ranked horizontal bars for the selected year and full-width, clickable 100% stacked bars for every year, all sharing one color legend. The table gives estimated illness counts alongside each share.
 
 The numbers are modeled estimates built from CDC surveillance and published etiology studies by `build_estimates.py`, which also writes every value to `estimates.csv`.
 

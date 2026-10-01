@@ -9,10 +9,10 @@ Open `index.html` in a browser. It is a single self-contained file, apart from G
 - **Two panels side by side:** the upper respiratory tract and the lower respiratory tract.
   - *Upper:* colds, sore throat, sinusitis, ear infections and croup (ICD-10 J00–J06, H65–H66).
   - *Lower:* bronchiolitis, acute bronchitis and pneumonia (J09–J22).
-- **A donut chart for the selected year,** with a ranked list of shares that adds to 100%.
-- **100% stacked year columns for 2015–2026.** Click a column, or use the ‹ › stepper or the arrow keys, to show that year in the donut and table. The two panels follow the same year unless **Link years across panels** is turned off.
-- **One shared color legend.** Click any pathogen in the legend, the ranked list, the donut or the table to follow it. The page then moves that pathogen to the base of every column and lists its share under each year.
-- **A full table of all 29 pathogens** (9 viruses, 13 bacteria, 6 fungi and protozoa), to two decimals, with subtotals by type.
+- **Ranked horizontal bars for the selected year** in each panel, on a shared scale, adding to 100%. Each panel also gives the estimated total number of illnesses and the rate per US resident.
+- **Full-width 100% stacked horizontal bars,** one per year from 2015 to 2026, for each tract. Shares large enough to fit are labeled inside their segment. Click a bar, use the ‹ › stepper, or use the arrow keys to show that year in the panels and the table. The two panels follow the same year unless **Link years across panels** is turned off.
+- **One shared color legend.** Click any pathogen in the legend, the ranked bars or the table to follow it. The page then moves that pathogen to the start of every year bar and lists its share at the right.
+- **A full table of all 29 pathogens** (9 viruses, 13 bacteria, 6 fungi and protozoa), with subtotals by type. Each cell shows estimated illnesses with the share in brackets, for example `135,209,000 [35.12%]`.
 
 ## Method
 
@@ -29,6 +29,8 @@ The numbers are **modeled estimates**, not an official dataset. `build_estimates
 3. **Influenza and SARS-CoV-2.** These are driven directly by CDC estimates of symptomatic illnesses, apportioned to calendar years by season timing.
 4. **Normalization.** Every tract-year is rescaled to 100% and rounded with the largest-remainder method, so the shares add to exactly 100.00.
 
+**Illness counts:** shares are converted to numbers of illnesses by anchoring each tract to CDC's influenza illness estimates. Every flu illness counts once in the upper tract, and 15% of them (`LRTI_SHARE_OF_FLU`) count in the lower tract, so one share point stands for a fixed number of illnesses. That comes to about 1 identified-cause upper-tract illness per US resident per year and about 30 million lower-tract illnesses. US population figures are Census Bureau July 1 estimates (2025–26 approximate) and are used for the per-person rate. Counts are rounded to the nearest 1,000 on the page.
+
 **What a share means:** the fraction of symptomatic illnesses with a known cause. It is not test positivity, and it is not deaths. Illnesses with no identified pathogen are excluded. A co-infection is counted once, under its main pathogen.
 
 **Caveats:**
@@ -42,7 +44,7 @@ The numbers are **modeled estimates**, not an official dataset. `build_estimates
 |---|---|
 | `index.html` | The interactive page. Its data block, between `DATA:START` / `DATA:END`, is generated. |
 | `build_estimates.py` | The model: baseline shares, yearly activity indices, influenza and COVID illness estimates. |
-| `estimates.csv` | Every value in long format: `year, tract, pathogen_id, pathogen, type, share_pct`. |
+| `estimates.csv` | Every value in long format: `year, tract, pathogen_id, pathogen, type, share_pct, est_illnesses`. |
 
 To change an assumption, edit the tables in `build_estimates.py`, then regenerate the CSV and the page's data block:
 

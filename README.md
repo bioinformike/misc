@@ -14,6 +14,11 @@ misc/
 ├── random_audio_checker/
 │   ├── README.md
 │   └── random_audio_check.sh
+├── respiratory_pathogen_prevalence/
+│   ├── README.md
+│   ├── build_estimates.py
+│   ├── estimates.csv
+│   └── index.html
 └── README.md
 ```
 
@@ -34,3 +39,11 @@ A Bash utility that uses `ffmpeg` to quickly check whether a video file contains
 The number of samples and sample duration can be configured, making it useful for quickly checking long video files without scanning the entire file.
 
 See [`random_audio_checker/README.md`](random_audio_checker/README.md) for usage information.
+
+### `respiratory_pathogen_prevalence/index.html`
+
+An interactive page showing the estimated share of US upper and lower respiratory tract infections caused by each pathogen (viruses, bacteria, fungi and protozoa) for every year from 2015 to 2026. Each tract has a donut chart for the selected year and clickable 100% stacked year columns that share one color legend.
+
+The numbers are modeled estimates built from CDC surveillance and published etiology studies by `build_estimates.py`, which also writes every value to `estimates.csv`.
+
+See [`respiratory_pathogen_prevalence/README.md`](respiratory_pathogen_prevalence/README.md) for the method, caveats and sources.

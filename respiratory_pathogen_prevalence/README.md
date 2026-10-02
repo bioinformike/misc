@@ -12,6 +12,7 @@ Open `index.html` in a browser. It is a single self-contained file, apart from G
 - **Ranked horizontal bars for the selected year** in each panel, on a shared scale, adding to 100%. Each panel also gives the estimated total number of illnesses and the rate per US resident.
 - **Full-width 100% stacked horizontal bars,** one per year from 2015 to 2026, for each tract. Shares large enough to fit are labeled inside their segment. Click a bar, use the ‹ › stepper, or use the arrow keys to show that year in the panels and the table. The two panels follow the same year unless **Link years across panels** is turned off.
 - **One shared color legend.** Click any pathogen in the legend, the ranked bars or the table to follow it. The page then moves that pathogen to the start of every year bar and lists its share at the right.
+- **Calculation for every value:** a section below the sources. Pick a tract and a year to see each pathogen's arithmetic (baseline × multiplier = units; units ÷ total = share; units × illnesses-per-unit = illnesses) and the source of each input.
 - **A full table of all 29 pathogens** (9 viruses, 13 bacteria, 6 fungi and protozoa), with subtotals by type. Each cell shows estimated illnesses with the share in brackets, for example `135,209,000 [35.12%]`.
 
 ## Method
@@ -44,6 +45,7 @@ The numbers are **modeled estimates**, not an official dataset. `build_estimates
 |---|---|
 | `index.html` | The interactive page. Its data block, between `DATA:START` / `DATA:END`, is generated. |
 | `build_estimates.py` | The model: baseline shares, yearly activity indices, influenza and COVID illness estimates. |
+| `calculations.csv` | Every input, intermediate value, formula and source behind each value: baseline, year multiplier, units, total units, share, illnesses-per-unit and estimated illnesses. |
 | `estimates.csv` | Every value in long format: `year, tract, pathogen_id, pathogen, type, share_pct, est_illnesses`. |
 
 To change an assumption, edit the tables in `build_estimates.py`, then regenerate the CSV and the page's data block:

@@ -18,6 +18,7 @@ Oct-Dec (RSV, seasonal coronaviruses) carry less weight that year.
 Outputs
 -------
   estimates.csv   long-format table: year, tract, pathogen, share_pct, est_illnesses
+  calculations.csv  every input, intermediate value, formula and source per value
   index.html      the block between DATA:START / DATA:END markers is rewritten
 
 Usage:  python3 build_estimates.py
@@ -179,6 +180,36 @@ ACTIVITY = {
 # vaccine) and older-adult RSV vaccines reduce severe RSV LRTI from late 2023.
 LOWER_MODIFIER = {"rsv": {2024: 0.90, 2025: 0.85, 2026: 0.85}}
 
+# Where each number comes from, shown beside every calculation on the page.
+BASELINE_SOURCE = {
+    "upper": "Author-set from Heikkinen & Jarvinen 2003 (colds), Kaur 2017 (otitis media), Centor 2015 (pharyngitis)",
+    "lower": "Author-set from the CDC EPIC studies (Jain 2015, NEJM, adults and children)",
+}
+_NREVSS = "CDC NREVSS national trend, read by the author (not an exact ratio)"
+_DIP = "Author estimate: typical-year 1.0, with a 2020-21 pandemic dip"
+ACTIVITY_SOURCE = {
+    "rhino": _NREVSS + "; EV-D68 years 2018/2022/2024 raised",
+    "rsv": _NREVSS + "; 2021 off-season and 2022 early surges",
+    "hmpv": _NREVSS + "; large 2023 spring season",
+    "piv": _NREVSS, "adeno": _NREVSS, "hcov": _NREVSS,
+    "spn": "Author estimate from CDC ABCs pneumococcal trends; PCV15/20/21 slow decline",
+    "gas": "Author estimate from CDC ABCs group A strep trends; 2022-23 surge",
+    "hflu": _DIP, "mcat": _DIP, "sau": _DIP, "gnb": _DIP, "fnec": _DIP, "gcs": _DIP,
+    "mpn": "Author estimate; 2024 = 2.6 from MMWR 2025 (pediatric CAP 12.5 vs 2.1 per 1,000)",
+    "cpn": "Author estimate tracking the Mycoplasma pattern",
+    "bper": "NNDSS pertussis cases / 18,386 (2015-19 mean); 2024 ~35,400, 2025 28,783; 2026 assumed",
+    "leg": "NNDSS legionellosis cases (approximate) / 2015-19 mean",
+    "mtb": "NTSS TB cases / 9,173 (2015-19 mean); 2025 = 10,260",
+    "cocci": "NNDSS coccidioidomycosis cases (approximate) / 2015-19 mean",
+    "histo": "Author estimate (flat)", "pjp": "Author estimate: slow decline with HIV treatment",
+    "asp": "Author estimate: COVID-associated aspergillosis 2020-22",
+    "blasto": "Author estimate: 2023 Michigan outbreak", "mucor": "Author estimate (flat)",
+    "proto": "Author estimate (flat)",
+    "fluA": "CDC flu burden by season, apportioned to calendar years; A/B split from FluView",
+    "fluB": "CDC flu burden by season, apportioned to calendar years; A/B split from FluView",
+    "sars2": "CDC COVID-19 burden estimates and JAMA Intern Med 2026, apportioned to calendar years",
+}
+
 
 # ---------------------------------------------------------------------------
 # Case counts. Shares are turned into estimated illness counts by anchoring each
@@ -237,6 +268,31 @@ def raw_units(tract, year):
     return units
 
 
+def explain(tract, year, pid, units):
+    """Human-readable calculation of one pathogen's units in a tract-year."""
+    a_base, b_base = flu_baseline_split()
+    flu_share = FLU_BASELINE_SHARE[tract]
+    if pid in ("fluA", "fluB"):
+        is_a = pid == "fluA"
+        mean = a_base if is_a else b_base
+        slice_ = flu_share * mean / (a_base + b_base)
+        ill = FLU_ILLNESS_M[year][0 if is_a else 1]
+        return {"baseline": round(slice_, 3), "mult": round(ill / mean, 4),
+                "formula": f"{slice_:.2f} x ({ill:.2f}M / {mean:.2f}M) = {units:.3f}"}
+    if pid == "sars2":
+        ill = COVID_ILLNESS_M.get(year, 0.0)
+        f = COVID_LRTI_FACTOR.get(year, 1.0) if tract == "lower" else 1.0
+        tail = f" x {f:.2f} LRTI factor" if tract == "lower" else ""
+        return {"baseline": None, "mult": None,
+                "formula": f"{ill:.1f}M x ({flu_share:g} / {a_base + b_base:.2f}M){tail} = {units:.3f}"}
+    base = BASELINE[tract][pid]
+    mult = ACTIVITY[pid][year]
+    mod = LOWER_MODIFIER.get(pid, {}).get(year, 1.0) if tract == "lower" else 1.0
+    mod_txt = f" x {mod:.2f} immunization" if mod != 1.0 else ""
+    return {"baseline": base, "mult": mult, "mod": mod,
+            "formula": f"{base:g} x {mult:.2f}{mod_txt} = {units:.3f}"}
+
+
 def to_shares(units, decimals=2):
     """Normalise to 100 and round with largest-remainder so the total is exact."""
     total = sum(units.values())
@@ -265,7 +321,32 @@ def build():
         t: {y: {pid: round(v * illnesses_per_unit(t) * 1e6) for pid, v in raw[t][y].items()} for y in YEARS}
         for t in raw
     }
-    return shares, trace, cases
+    audit = {t: {y: {pid: explain(t, y, pid, raw[t][y][pid]) for pid, *_ in PATHOGENS} for y in YEARS} for t in raw}
+    for t in raw:
+        for y in YEARS:
+            for pid in audit[t][y]:
+                audit[t][y][pid]["units"] = raw[t][y][pid]
+    return shares, trace, cases, audit
+
+
+def write_calculations(shares, cases, audit):
+    path = HERE / "calculations.csv"
+    with path.open("w", newline="") as fh:
+        w = csv.writer(fh)
+        w.writerow(["year", "tract", "pathogen_id", "pathogen", "baseline_pct", "year_multiplier", "lower_modifier",
+                    "units", "total_units", "share_pct", "illnesses_per_unit", "est_illnesses",
+                    "units_formula", "multiplier_source", "baseline_source"])
+        for t in ("upper", "lower"):
+            for y in YEARS:
+                total = sum(a["units"] for a in audit[t][y].values())
+                for pid, name, _, _ in PATHOGENS:
+                    a = audit[t][y][pid]
+                    w.writerow([y, t, pid, name, a["baseline"] if a["baseline"] is not None else "",
+                                a["mult"] if a["mult"] is not None else "", a.get("mod", ""),
+                                f"{a['units']:.4f}", f"{total:.4f}", f"{shares[t][y][pid]:.2f}",
+                                round(illnesses_per_unit(t) * 1e6), cases[t][y][pid], a["formula"],
+                                ACTIVITY_SOURCE[pid], BASELINE_SOURCE[t] if pid not in ("fluA", "fluB", "sars2") else ""])
+    return path
 
 
 def write_csv(shares, cases):
@@ -280,7 +361,7 @@ def write_csv(shares, cases):
     return path
 
 
-def write_html(shares, trace, cases):
+def write_html(shares, trace, cases, audit):
     path = HERE / "index.html"
     payload = {
         "years": YEARS,
@@ -298,6 +379,22 @@ def write_html(shares, trace, cases):
             for t in cases
         },
         "population": {str(y): round(US_POP_M[y] * 1e6) for y in YEARS},
+        "audit": {
+            "rows": {
+                t: {str(y): [[round(audit[t][y][pid]["units"], 4), audit[t][y][pid]["formula"]] for pid, *_ in PATHOGENS]
+                    for y in YEARS}
+                for t in audit
+            },
+            "source": [ACTIVITY_SOURCE[pid] for pid, *_ in PATHOGENS],
+            "baselineSource": BASELINE_SOURCE,
+            "perUnit": {t: round(illnesses_per_unit(t) * 1e6) for t in ("upper", "lower")},
+            "fluMean": [round(v, 3) for v in flu_baseline_split()],
+            "fluShare": FLU_BASELINE_SHARE,
+            "lrtiShareOfFlu": LRTI_SHARE_OF_FLU,
+            "flu": {str(y): list(FLU_ILLNESS_M[y]) for y in YEARS},
+            "covid": {str(y): COVID_ILLNESS_M.get(y, 0.0) for y in YEARS},
+            "covidLrti": {str(y): COVID_LRTI_FACTOR.get(y, 1.0) for y in YEARS},
+        },
     }
     block = "/* DATA:START */\nconst DATA = " + json.dumps(payload, separators=(",", ":")) + ";\n/* DATA:END */"
     html = path.read_text()
@@ -309,7 +406,8 @@ def write_html(shares, trace, cases):
 
 
 if __name__ == "__main__":
-    shares, trace, cases = build()
+    shares, trace, cases, audit = build()
     print("wrote", write_csv(shares, cases))
+    print("wrote", write_calculations(shares, cases, audit))
     if (HERE / "index.html").exists():
-        print("wrote", write_html(shares, trace, cases))
+        print("wrote", write_html(shares, trace, cases, audit))
